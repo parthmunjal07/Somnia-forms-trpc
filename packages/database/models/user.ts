@@ -3,7 +3,6 @@ import {
   uuid,
   varchar,
   timestamp,
-  boolean,
   text,
   pgEnum,
   index,
@@ -23,7 +22,7 @@ export const usersTable = pgTable("users", {
   fullName: varchar("full_name", { length: 80 }).notNull(),
 
   email: varchar("email", { length: 255 }).notNull().unique(),
-  emailVerified: boolean("email_verified").default(false),
+  emailVerifiedAt: timestamp("email_verified_at"),
   
   passwordHash: varchar("password_hash", { length: 255 }),
   

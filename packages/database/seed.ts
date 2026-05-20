@@ -19,7 +19,7 @@ async function seed() {
     email: "demo@somnia.io",
     passwordHash: hashPassword("Demo@2025"),
     role: "THE_ARCHITECT",
-    emailVerified: true,
+    emailVerifiedAt: new Date(),
   }).returning();
 
   const [adminUser] = await db.insert(usersTable).values({
@@ -27,7 +27,7 @@ async function seed() {
     email: "admin@somnia.io",
     passwordHash: hashPassword("Admin@2025"),
     role: "THE_EXTRACTOR",
-    emailVerified: true,
+    emailVerifiedAt: new Date(),
   }).returning();
 
   if (!demoUser || !adminUser) {

@@ -1,13 +1,8 @@
-import { initTRPC, TRPCError } from "@trpc/server";
+// packages/trpc/server/trpc.ts
 import { OpenApiMeta } from "trpc-to-openapi";
+import type { Context } from "./context";
 
-import { createContext } from "./context";
-
-export const tRPCContext = initTRPC
-  .meta<OpenApiMeta>()
-  .context<typeof createContext>()
-  .create({});
-
-export const router = tRPCContext.router;
-
-export const publicProcedure = tRPCContext.procedure;
+// Type-only exports — no initTRPC call here.
+// The single tRPC instance lives in apps/api/src/trpc/procedures.ts
+export type { Context };
+export type { OpenApiMeta };
