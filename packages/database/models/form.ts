@@ -1,0 +1,138 @@
+import {
+  pgTable,
+  uuid,
+  varchar,
+  timestamp,
+  boolean,
+  text,
+  integer,
+  jsonb,
+  pgEnum,
+  index,
+  primaryKey,
+} from "drizzle-orm/pg-core";
+import { usersTable } from "./user";
+
+export const formStatusEnum = pgEnum("form_status", [
+  "draft",
+  "published",
+  "archived",
+]);
+
+export const visibilityEnum = pgEnum("visibility", [
+  "public",
+  "unlisted",
+]);
+
+export const collaboratorRoleEnum = pgEnum("collaborator_role", [
+  "THE_FORGER",
+  "THE_SHADE",
+]);
+
+export const fieldTypeEnum = pgEnum("field_type", [
+  "short_text",
+  "long_text",
+  "email",
+  "number",
+  "single_select",
+  "multi_select",
+  "checkbox",
+  "date",
+  "rating",
+]);
+
+export const formsTable = pgTable(
+  "forms",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .references(() => usersTable.id, { onDelete: "cascade" })
+      .notNull(),
+    title: varchar("title", { length: 255 }).notNull(),
+    slug: varchar("slug", { length: 255 }).notNull(),
+    status: formStatusEnum("status").default("draft").notNull(),
+    visibility: visibilityEnum("visibility").default("public").notNull(),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
+  },
+  (table) => [
+    index("forms_user_id_idx").on(table.userId),
+    index("forms_slug_idx").on(table.slug),
+  ]
+);
+
+export const formCollaboratorsTable = pgTable(
+  "form_collaborators",
+  {
+    formId: uuid("form_id")
+      .references(() => formsTable.id, { onDelete: "cascade" })
+      .notNull(),
+    userId: uuid("user_id")
+      .references(() => usersTable.id, { onDelete: "cascade" })
+      .notNull(),
+    role: collaboratorRoleEnum("role").notNull(),
+    invitedAt: timestamp("invited_at").defaultNow().notNull(),
+    acceptedAt: timestamp("accepted_at"),
+  },
+  (table) => [
+    primaryKey({ columns: [table.formId, table.userId] }),
+    index("form_collaborators_form_id_idx").on(table.formId),
+    index("form_collaborators_user_id_idx").on(table.userId),
+  ]
+);
+
+export const fieldsTable = pgTable(
+  "fields",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    formId: uuid("form_id")
+      .references(() => formsTable.id, { onDelete: "cascade" })
+      .notNull(),
+    label: text("label").notNull(),
+    type: fieldTypeEnum("type").notNull(),
+    required: boolean("required").default(false).notNull(),
+    placeholder: text("placeholder"),
+    options: jsonb("options"), // array of strings for dropdowns/checkboxes
+    order: integer("order").notNull(),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
+  },
+  (table) => [index("fields_form_id_idx").on(table.formId)]
+);
+
+export const responsesTable = pgTable(
+  "responses",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    formId: uuid("form_id")
+      .references(() => formsTable.id, { onDelete: "cascade" })
+      .notNull(),
+    responseValues: jsonb("response_values").notNull(), // { "field_id": "value" }
+    submittedAt: timestamp("submitted_at").defaultNow().notNull(),
+  },
+  (table) => [index("responses_form_id_idx").on(table.formId)]
+);
+
+export const analyticsTable = pgTable(
+  "analytics",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    formId: uuid("form_id")
+      .references(() => formsTable.id, { onDelete: "cascade" })
+      .notNull(),
+    viewsCount: integer("views_count").default(0).notNull(),
+    submissionsCount: integer("submissions_count").default(0).notNull(),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
+  },
+  (table) => [index("analytics_form_id_idx").on(table.formId)]
+);
+
+export type SelectForm = typeof formsTable.$inferSelect;
+export type InsertForm = typeof formsTable.$inferInsert;
+export type SelectField = typeof fieldsTable.$inferSelect;
+export type InsertField = typeof fieldsTable.$inferInsert;
+export type SelectResponse = typeof responsesTable.$inferSelect;
+export type InsertResponse = typeof responsesTable.$inferInsert;
+export type SelectAnalytics = typeof analyticsTable.$inferSelect;
+export type InsertAnalytics = typeof analyticsTable.$inferInsert;
