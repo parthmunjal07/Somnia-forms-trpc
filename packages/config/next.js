@@ -31,6 +31,8 @@ export const nextJsConfig = [
       ...pluginReact.configs.flat.recommended.languageOptions,
       globals: {
         ...globals.serviceworker,
+        ...globals.node,
+        ...globals.browser,
       },
     },
   },
@@ -52,6 +54,7 @@ export const nextJsConfig = [
       ...pluginReactHooks.configs.recommended.rules,
       // React scope no longer necessary with new JSX transform.
       "react/react-in-jsx-scope": "off",
+      "react/prop-types": "off",
     },
   },
 ];

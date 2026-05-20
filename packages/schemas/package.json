@@ -1,14 +1,13 @@
 {
-  "name": "@repo/logger",
+  "name": "@repo/schemas",
   "version": "1.0.0",
-  "scripts": {},
+  "private": true,
   "devDependencies": {
     "@repo/config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "winston": "^3.19.0",
     "zod": "^4.3.5"
   }
 }

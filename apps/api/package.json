@@ -9,13 +9,14 @@
     "lint": "eslint src/*"
   },
   "devDependencies": {
-    "@repo/eslint-config": "workspace:*",
+    "@repo/config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@swc/core": "^1.15.8",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/node": "^22.15.3",
     "dotenv-cli": "^11.0.0",
+    "eslint": "^9.39.1",
     "tsup": "^8.5.1",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"

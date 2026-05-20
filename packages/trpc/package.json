@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "devDependencies": {
-    "@repo/eslint-config": "workspace:*",
+    "@repo/config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "dotenv-cli": "^11.0.0",
     "typescript": "^5.9.3"
