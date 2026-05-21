@@ -3,7 +3,6 @@
   "compilerOptions": {
     "rootDir": "./src",
     "outDir": "./dist",
-    "ignoreDeprecations": "6.0",
     "moduleResolution": "Node",
     "module": "CommonJS",
     // We don't need these for our final build

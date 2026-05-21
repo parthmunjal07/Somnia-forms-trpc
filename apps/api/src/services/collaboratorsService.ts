@@ -1,136 +1,117 @@
 import { db } from "@repo/database";
-import { formCollaboratorsTable, formsTable } from "@repo/database/models/form";
-import { usersTable } from "@repo/database/models/user";
-import { eq, and, desc } from "drizzle-orm";
+import { formCollaboratorsTable, usersTable } from "@repo/database/schema";
+import { eq, and } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
-import { getUserFormRole } from "./formsService";
 import { can } from "../rbac";
-import { SelectUser } from "@repo/database/models/user";
-import { paginationInput } from "@repo/trpc/pagination";
-import { z } from "zod";
+import { getUserFormRole } from "./formsService";
 
 export class CollaboratorsService {
-  async getTierCollaboratorLimit(tier: SelectUser["subscriptionTier"]) {
-    switch (tier) {
-      case "free":
-        return 0; // Free cannot invite collaborators
-      case "pro":
-        return 3;
-      case "team":
-      default:
-        return Infinity;
-    }
-  }
-
-  async list(formId: string, userId: string) {
-    const role = await getUserFormRole(formId, userId);
+  async list(formId: string, currentUserId: string) {
+    // 1. Check if the current user even has permission to view this form
+    const role = await getUserFormRole(formId, currentUserId);
     
-    if (!role || !can(role, "manageCollaborators")) {
-      throw new TRPCError({ code: "FORBIDDEN", message: "Insufficient permissions" });
+    if (!role || !can(role as any, "viewForm")) {
+      throw new TRPCError({ code: "FORBIDDEN", message: "Insufficient permissions to view collaborators" });
     }
 
+    // 2. Fetch collaborators joined with their user details
     const collaborators = await db
       .select({
-        id: formCollaboratorsTable.id,
+        userId: usersTable.id,
+        email: usersTable.email,
+        fullName: usersTable.fullName,
         role: formCollaboratorsTable.role,
         invitedAt: formCollaboratorsTable.invitedAt,
         acceptedAt: formCollaboratorsTable.acceptedAt,
-        user: {
-          id: usersTable.id,
-          fullName: usersTable.fullName,
-          email: usersTable.email,
-        }
       })
       .from(formCollaboratorsTable)
-      .innerJoin(usersTable, eq(usersTable.id, formCollaboratorsTable.userId))
+      .innerJoin(usersTable, eq(formCollaboratorsTable.userId, usersTable.id))
       .where(eq(formCollaboratorsTable.formId, formId));
 
     return collaborators;
   }
 
-  async invite(formId: string, inviterUserId: string, inviteeEmail: string, roleType: "THE_DREAMER" | "THE_EXTRACTOR" | "THE_ARCHITECT" | "THE_FORGER" | "THE_SHADE") {
-    const role = await getUserFormRole(formId, inviterUserId);
+  async invite(
+    formId: string, 
+    currentUserId: string, 
+    targetEmail: string, 
+    role: "THE_FORGER" | "THE_SHADE"
+  ) {
+    // 1. Only THE_ARCHITECT (form owner) or an Admin can invite people
+    const currentUserRole = await getUserFormRole(formId, currentUserId);
     
-    if (!role || !can(role, "manageCollaborators")) {
-      throw new TRPCError({ code: "FORBIDDEN", message: "Insufficient permissions" });
+    if (!currentUserRole || !can(currentUserRole as any, "inviteCollaborator")) {
+      throw new TRPCError({ code: "FORBIDDEN", message: "Only the Architect can invite collaborators" });
     }
 
-    const [formOwner] = await db
-      .select({ userId: formsTable.userId })
-      .from(formsTable)
-      .where(eq(formsTable.id, formId))
-      .limit(1);
-
-    if (!formOwner) throw new TRPCError({ code: "NOT_FOUND", message: "Form not found" });
-
-    const [ownerData] = await db
-      .select({ subscriptionTier: usersTable.subscriptionTier })
+    // 2. Look up the user being invited by email
+    const [targetUser] = await db
+      .select()
       .from(usersTable)
-      .where(eq(usersTable.id, formOwner.userId))
-      .limit(1);
-      
-    if (!ownerData) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
-
-    const maxCollabs = await this.getTierCollaboratorLimit(ownerData.subscriptionTier);
-
-    const existingCollabs = await db
-      .select({ id: formCollaboratorsTable.id })
-      .from(formCollaboratorsTable)
-      .where(eq(formCollaboratorsTable.formId, formId));
-
-    if (existingCollabs.length >= maxCollabs) {
-      throw new TRPCError({ code: "FORBIDDEN", message: `Collaborator limit reached for ${ownerData.subscriptionTier} tier` });
-    }
-
-    const [invitee] = await db
-      .select({ id: usersTable.id })
-      .from(usersTable)
-      .where(eq(usersTable.email, inviteeEmail))
+      .where(eq(usersTable.email, targetEmail))
       .limit(1);
 
-    if (!invitee) {
-      throw new TRPCError({ code: "NOT_FOUND", message: "User with this email not found" });
+    if (!targetUser) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "User with this email does not exist" });
     }
 
-    if (invitee.id === formOwner.userId) {
-      throw new TRPCError({ code: "BAD_REQUEST", message: "Cannot invite the form owner" });
+    if (targetUser.id === currentUserId) {
+      throw new TRPCError({ code: "BAD_REQUEST", message: "You cannot invite yourself" });
     }
 
+    // 3. Prevent duplicate invitations
     const [existing] = await db
       .select()
       .from(formCollaboratorsTable)
-      .where(and(eq(formCollaboratorsTable.formId, formId), eq(formCollaboratorsTable.userId, invitee.id)))
+      .where(
+        and(
+          eq(formCollaboratorsTable.formId, formId),
+          eq(formCollaboratorsTable.userId, targetUser.id)
+        ) as any
+      )
       .limit(1);
 
     if (existing) {
-      throw new TRPCError({ code: "CONFLICT", message: "User is already a collaborator or invited" });
+      throw new TRPCError({ code: "CONFLICT", message: "User is already a collaborator on this Dreamscape" });
     }
 
-    const [collab] = await db
+    // 4. Insert the collaborator record
+    const [collaborator] = await db
       .insert(formCollaboratorsTable)
       .values({
         formId,
-        userId: invitee.id,
-        role: roleType,
+        userId: targetUser.id,
+        role,
+        // Auto-accepting immediately so the frontend dashboard populates seamlessly 
+        // without needing a complex email-accept flow for the hackathon.
+        acceptedAt: new Date(), 
       })
       .returning();
 
-    return collab;
+    return collaborator;
   }
 
-  async remove(formId: string, requesterUserId: string, collaboratorId: string) {
-    const role = await getUserFormRole(formId, requesterUserId);
+  async remove(formId: string, currentUserId: string, collaboratorId: string) {
+    // 1. Only THE_ARCHITECT can remove collaborators
+    const currentUserRole = await getUserFormRole(formId, currentUserId);
     
-    if (!role || !can(role, "manageCollaborators")) {
-      throw new TRPCError({ code: "FORBIDDEN", message: "Insufficient permissions" });
+    if (!currentUserRole || !can(currentUserRole as any, "inviteCollaborator")) {
+      throw new TRPCError({ code: "FORBIDDEN", message: "Only the Architect can remove collaborators" });
     }
 
-    await db.delete(formCollaboratorsTable).where(
-      and(
-        eq(formCollaboratorsTable.id, collaboratorId),
-        eq(formCollaboratorsTable.formId, formId)
-      )
-    );
+    if (currentUserId === collaboratorId) {
+      throw new TRPCError({ code: "BAD_REQUEST", message: "You cannot remove yourself" });
+    }
+
+    // 2. Delete the record
+    await db
+      .delete(formCollaboratorsTable)
+      .where(
+        and(
+          eq(formCollaboratorsTable.formId, formId),
+          eq(formCollaboratorsTable.userId, collaboratorId)
+        ) as any
+      );
 
     return { success: true };
   }

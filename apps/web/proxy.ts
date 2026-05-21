@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server";
 
 // Presence-check only — does NOT cryptographically verify JWT.
 // Full verification happens on the API server for each tRPC call.
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const hasAccessToken = request.cookies.has("access_token");
   const hasRefreshToken = request.cookies.has("refresh_token");
 

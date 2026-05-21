@@ -8,6 +8,5 @@
     "pagination.ts"
   ],
   "compilerOptions": {
-    "ignoreDeprecations": "6.0",
   },
 }

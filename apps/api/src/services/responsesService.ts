@@ -90,8 +90,7 @@ export class ResponsesService {
         .insert(responsesTable)
         .values({
           formId,
-          data: parsedData.data,
-          metadata: { ip },
+          responseValues: parsedData.data,
         })
         .returning();
 
