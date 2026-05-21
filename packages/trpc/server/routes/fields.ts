@@ -1,6 +1,6 @@
-import { z } from "../../schema";
-import { router, publicProcedure, protectedProcedure } from "../../../../../apps/api/src/trpc/procedures";
-import { fieldsService } from "../../../../../apps/api/src/services/fieldsService";
+import { z } from "../schema";
+import { router, publicProcedure, protectedProcedure } from "../../../../apps/api/src/trpc/procedures";
+import { fieldsService } from "../../../../apps/api/src/services/fieldsService";
 
 const fieldTypeEnum = z.enum([
   "short_text",
@@ -17,13 +17,13 @@ const fieldTypeEnum = z.enum([
 export const fieldsRouter = router({
   list: protectedProcedure
     .input(z.object({ formId: z.string() }))
-    .query(async ({ input, ctx }) => {
+    .query(async ({ input, ctx }: { input: any, ctx: any }) => {
       return fieldsService.list(input.formId, ctx.user.id);
     }),
 
   getPublic: publicProcedure
     .input(z.object({ formId: z.string() }))
-    .query(async ({ input }) => {
+    .query(async ({ input }: { input: any}) => {
       return fieldsService.getPublicFields(input.formId);
     }),
 
@@ -36,7 +36,7 @@ export const fieldsRouter = router({
       options: z.any().optional(),
       order: z.number().int().min(0),
     }))
-    .mutation(async ({ input, ctx }) => {
+    .mutation(async ({ input, ctx }: { input: any, ctx: any }) => {
       const { formId, ...fieldData } = input;
       return fieldsService.create(formId, ctx.user.id, fieldData);
     }),
@@ -51,14 +51,14 @@ export const fieldsRouter = router({
       options: z.any().optional(),
       order: z.number().int().min(0).optional(),
     }))
-    .mutation(async ({ input, ctx }) => {
+    .mutation(async ({ input, ctx }: { input: any, ctx: any }) => {
       const { id, formId, ...data } = input;
       return fieldsService.update(id, formId, ctx.user.id, data);
     }),
 
   delete: protectedProcedure
     .input(z.object({ id: z.string(), formId: z.string() }))
-    .mutation(async ({ input, ctx }) => {
+    .mutation(async ({ input, ctx }: { input: any, ctx: any }) => {
       return fieldsService.delete(input.id, input.formId, ctx.user.id);
     }),
 });

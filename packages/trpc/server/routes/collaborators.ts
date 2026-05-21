@@ -1,13 +1,13 @@
-import { z } from "../../schema";
-import { router, protectedProcedure } from "../../../../../apps/api/src/trpc/procedures";
-import { collaboratorsService } from "../../../../../apps/api/src/services/collaboratorsService";
+import { z } from "../schema";
+import { router, protectedProcedure } from "../../../../apps/api/src/trpc/procedures";
+import { collaboratorsService } from "../../../../apps/api/src/services/collaboratorsService";
 
 const roleTypeEnum = z.enum(["THE_DREAMER", "THE_EXTRACTOR", "THE_ARCHITECT", "THE_FORGER", "THE_SHADE"]);
 
 export const collaboratorsRouter = router({
   list: protectedProcedure
     .input(z.object({ formId: z.string() }))
-    .query(async ({ input, ctx }) => {
+    .query(async ({ input, ctx }: { input: any, ctx: any }) => {
       return collaboratorsService.list(input.formId, ctx.user.id);
     }),
 
@@ -17,7 +17,7 @@ export const collaboratorsRouter = router({
       email: z.string().email(),
       role: roleTypeEnum,
     }))
-    .mutation(async ({ input, ctx }) => {
+    .mutation(async ({ input, ctx }: { input: any, ctx: any }) => {
       return collaboratorsService.invite(input.formId, ctx.user.id, input.email, input.role);
     }),
 
@@ -26,7 +26,7 @@ export const collaboratorsRouter = router({
       formId: z.string(),
       collaboratorId: z.string(),
     }))
-    .mutation(async ({ input, ctx }) => {
+    .mutation(async ({ input, ctx }: { input: any, ctx: any }) => {
       return collaboratorsService.remove(input.formId, ctx.user.id, input.collaboratorId);
     }),
 });

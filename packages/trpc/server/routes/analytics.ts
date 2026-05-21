@@ -1,6 +1,6 @@
-import { z } from "../../schema";
-import { router, publicProcedure, protectedProcedure } from "../../../../../apps/api/src/trpc/procedures";
-import { analyticsService } from "../../../../../apps/api/src/services/analyticsService";
+import { z } from "../schema";
+import { router, publicProcedure, protectedProcedure } from "../../../../apps/api/src/trpc/procedures";
+import { analyticsService } from "../../../../apps/api/src/services/analyticsService";
 
 export const analyticsRouter = router({
   getSummary: protectedProcedure
