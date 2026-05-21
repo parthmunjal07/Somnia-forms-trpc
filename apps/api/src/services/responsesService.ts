@@ -11,6 +11,7 @@ import { z } from "zod";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import { env } from "../env";
+import bcrypt from "bcryptjs";
 
 let ratelimit: Ratelimit | null = null;
 if (env.UPSTASH_REDIS_REST_URL && env.UPSTASH_REDIS_REST_TOKEN) {
@@ -36,7 +37,7 @@ export class ResponsesService {
     }
   }
 
-  async submit(formId: string, data: any, ip: string) {
+  async submit(formId: string, data: any, ip: string, password?: string) {
     if (ratelimit) {
       const { success } = await ratelimit.limit(`submit_${formId}_${ip}`);
       if (!success) {
@@ -45,13 +46,35 @@ export class ResponsesService {
     }
 
     const [form] = await db
-      .select({ userId: formsTable.userId, status: formsTable.status })
+      .select({
+        userId: formsTable.userId,
+        status: formsTable.status,
+        expiresAt: formsTable.expiresAt,
+        responseLimit: formsTable.responseLimit,
+        passwordHash: formsTable.passwordHash,
+      })
       .from(formsTable)
       .where(eq(formsTable.id, formId))
       .limit(1);
 
     if (!form || form.status !== "published") {
       throw new TRPCError({ code: "NOT_FOUND", message: "Form not published or not found" });
+    }
+
+    // Expiry check
+    if (form.expiresAt && form.expiresAt < new Date()) {
+      throw new TRPCError({ code: "FORBIDDEN", message: "Form has expired" });
+    }
+
+    // Password protection check
+    if (form.passwordHash) {
+      if (!password) {
+        throw new TRPCError({ code: "UNAUTHORIZED", message: "Password required" });
+      }
+      const match = await bcrypt.compare(password, form.passwordHash);
+      if (!match) {
+        throw new TRPCError({ code: "UNAUTHORIZED", message: "Incorrect password" });
+      }
     }
 
     const [owner] = await db
@@ -62,7 +85,11 @@ export class ResponsesService {
 
     if (!owner) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR" });
 
-    const maxSubmissions = await this.getTierLimit(owner.subscriptionTier);
+    // Enforce tier limit AND custom response limit if defined
+    const tierLimit = await this.getTierLimit(owner.subscriptionTier);
+    const limitToEnforce = form.responseLimit !== null && form.responseLimit !== undefined
+      ? Math.min(tierLimit, form.responseLimit)
+      : tierLimit;
 
     const [analytics] = await db
       .select({ submissionsCount: analyticsTable.submissionsCount })
@@ -70,8 +97,13 @@ export class ResponsesService {
       .where(eq(analyticsTable.formId, formId))
       .limit(1);
 
-    if (analytics && analytics.submissionsCount >= maxSubmissions) {
-      throw new TRPCError({ code: "FORBIDDEN", message: `Submission limit reached for form owner's tier` });
+    if (analytics && analytics.submissionsCount >= limitToEnforce) {
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: form.responseLimit && analytics.submissionsCount >= form.responseLimit
+          ? "Form response limit reached"
+          : "Submission limit reached for form owner's tier",
+      });
     }
 
     const schema = await compileFormSchema(formId);

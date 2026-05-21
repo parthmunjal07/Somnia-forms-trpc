@@ -8,10 +8,11 @@ export const responsesRouter = router({
     .input(z.object({
       formId: z.string(),
       data: z.any(),
+      password: z.string().optional(),
     }))
     .mutation(async ({ input, ctx }: { input: any, ctx: any }) => {
       const ip = ctx.req?.ip ?? "127.0.0.1";
-      return responsesService.submit(input.formId, input.data, ip);
+      return responsesService.submit(input.formId, input.data, ip, input.password);
     }),
 
   list: protectedProcedure

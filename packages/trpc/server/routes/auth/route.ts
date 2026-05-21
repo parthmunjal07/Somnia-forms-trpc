@@ -151,7 +151,13 @@ export const authRouter = router({
     .input(z.object({ email: z.string().email(), password: z.string() }))
     .output(
       z.object({
-        user: z.object({ id: z.string(), email: z.string(), role: z.enum(roleEnum.enumValues) }),
+        user: z.object({
+          id: z.string(),
+          email: z.string(),
+          role: z.enum(roleEnum.enumValues),
+          emailVerifiedAt: z.string().nullable(),
+          subscriptionTier: z.enum(["free", "pro", "team"]),
+        }),
       }),
     )
     .mutation(async ({ input, ctx }) => {
@@ -181,7 +187,15 @@ export const authRouter = router({
       const tokens = generateTokens(user);
       setTokenCookies(ctx.res, tokens);
 
-      return { user: { id: user.id, email: user.email, role: user.role } };
+      return {
+        user: {
+          id: user.id,
+          email: user.email,
+          role: user.role,
+          emailVerifiedAt: user.emailVerifiedAt ? user.emailVerifiedAt.toISOString() : null,
+          subscriptionTier: user.subscriptionTier,
+        },
+      };
     }),
 
   // ─── Me ──────────────────────────────────────────────────────────────────────
@@ -193,8 +207,9 @@ export const authRouter = router({
         user: z.object({
           id: z.string(),
           email: z.string(),
-          role: z.string(),
+          role: z.enum(roleEnum.enumValues),
           emailVerifiedAt: z.string().nullable(),
+          subscriptionTier: z.enum(["free", "pro", "team"]),
         }),
       }),
     )
@@ -205,12 +220,15 @@ export const authRouter = router({
       if (access_token) {
         try {
           const payload = verifyAccessToken(access_token);
+          const [user] = await db.select().from(usersTable).where(eq(usersTable.id, payload.sub)).limit(1);
+          if (!user) throw new TRPCError({ code: "UNAUTHORIZED" });
           return {
             user: {
-              id: payload.sub,
-              email: payload.email,
-              role: payload.role,
-              emailVerifiedAt: payload.emailVerifiedAt,
+              id: user.id,
+              email: user.email,
+              role: user.role,
+              emailVerifiedAt: user.emailVerifiedAt ? user.emailVerifiedAt.toISOString() : null,
+              subscriptionTier: user.subscriptionTier,
             },
           };
         } catch {
@@ -235,6 +253,7 @@ export const authRouter = router({
               email: user.email,
               role: user.role,
               emailVerifiedAt: user.emailVerifiedAt?.toISOString() ?? null,
+              subscriptionTier: user.subscriptionTier,
             },
           };
         } catch {
@@ -247,5 +266,15 @@ export const authRouter = router({
 
       // 5. Both invalid
       throw new TRPCError({ code: "UNAUTHORIZED", message: "Not authenticated" });
+    }),
+
+  upgradeTier: protectedProcedure
+    .input(z.object({ tier: z.enum(["free", "pro", "team"]) }))
+    .mutation(async ({ input, ctx }: { input: any, ctx: any }) => {
+      await db
+        .update(usersTable)
+        .set({ subscriptionTier: input.tier })
+        .where(eq(usersTable.id, ctx.user.id));
+      return { success: true, tier: input.tier };
     }),
 });

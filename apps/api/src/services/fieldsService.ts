@@ -125,6 +125,25 @@ export class FieldsService {
 
     return { success: true };
   }
+
+  async reorder(formId: string, userId: string, fieldIds: string[]) {
+    const role = await getUserFormRole(formId, userId);
+    
+    if (!role || !can(role, "editForm")) {
+      throw new TRPCError({ code: "FORBIDDEN", message: "Insufficient permissions" });
+    }
+
+    await db.transaction(async (tx) => {
+      for (let i = 0; i < fieldIds.length; i++) {
+        await tx
+          .update(fieldsTable)
+          .set({ order: i })
+          .where(and(eq(fieldsTable.id, fieldIds[i]!), eq(fieldsTable.formId, formId)));
+      }
+    });
+
+    return { success: true };
+  }
 }
 
 export const fieldsService = new FieldsService();

@@ -61,4 +61,13 @@ export const fieldsRouter = router({
     .mutation(async ({ input, ctx }: { input: any, ctx: any }) => {
       return fieldsService.delete(input.id, input.formId, ctx.user.id);
     }),
+
+  reorder: protectedProcedure
+    .input(z.object({
+      formId: z.string(),
+      fieldIds: z.array(z.string()),
+    }))
+    .mutation(async ({ input, ctx }: { input: any, ctx: any }) => {
+      return fieldsService.reorder(input.formId, ctx.user.id, input.fieldIds);
+    }),
 });

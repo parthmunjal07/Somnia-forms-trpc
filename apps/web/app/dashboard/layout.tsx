@@ -1,4 +1,5 @@
 import { env } from "~/env.js";
+import { AuthGuard } from "~/components/AuthGuard";
 
 /**
  * Server-side dashboard layout.
@@ -30,7 +31,7 @@ export default async function DashboardLayout({
     <>
       {/* Inject CSRF token as a meta tag for client-side reads */}
       <meta name="csrf-token" content={csrfToken} />
-      {children}
+      <AuthGuard>{children}</AuthGuard>
     </>
   );
 }

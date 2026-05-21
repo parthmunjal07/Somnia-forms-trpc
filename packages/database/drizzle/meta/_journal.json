@@ -15,6 +15,20 @@
       "when": 1779276771649,
       "tag": "0001_long_shadow_king",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1779276771650,
+      "tag": "0002_phase3_email_verified_at",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1779276771651,
+      "tag": "0003_subscription_tier",
+      "breakpoints": true
     }
   ]
 }

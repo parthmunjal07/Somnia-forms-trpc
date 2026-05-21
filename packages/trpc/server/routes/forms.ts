@@ -28,9 +28,12 @@ export const formsRouter = router({
     }),
 
   getPublic: publicProcedure
-    .input(z.object({ slug: z.string() }))
-    .query(async ({ input }: { input: any, ctx: any }) => {
-      return formsService.getPublicForm(input.slug);
+    .input(z.object({
+      slug: z.string(),
+      password: z.string().optional(),
+    }))
+    .query(async ({ input }: { input: any }) => {
+      return formsService.getPublicForm(input.slug, input.password);
     }),
 
   update: protectedProcedure
@@ -40,6 +43,11 @@ export const formsRouter = router({
       slug: z.string().min(1).max(100).regex(/^[a-z0-9-]+$/).optional(),
       status: z.enum(["draft", "published", "archived"]).optional(),
       visibility: z.enum(["public", "unlisted"]).optional(),
+      theme: z.string().optional(),
+      responseLimit: z.number().nullable().optional(),
+      expiresAt: z.string().nullable().optional(),
+      password: z.string().nullable().optional(),
+      thankYouMessage: z.string().nullable().optional(),
     }))
     .mutation(async ({ input, ctx }: { input: any, ctx: any }) => {
       const { id, ...data } = input;
@@ -50,5 +58,11 @@ export const formsRouter = router({
     .input(z.object({ id: z.string() }))
     .mutation(async ({ input, ctx }: { input: any, ctx: any }) => {
       return formsService.delete(input.id, ctx.user.id);
+    }),
+
+  clone: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ input, ctx }: { input: any, ctx: any }) => {
+      return formsService.clone(input.id, ctx.user.id);
     }),
 });

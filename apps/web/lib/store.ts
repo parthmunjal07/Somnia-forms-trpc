@@ -13,6 +13,7 @@ export interface AuthUser {
   email: string;
   role: Role;
   emailVerifiedAt: string | null;
+  subscriptionTier: "free" | "pro" | "team";
 }
 
 interface AuthState {
