@@ -1,7 +1,6 @@
 import jwt from "jsonwebtoken";
-import type { SelectUser } from "@repo/database/schema";
+import type { SelectUser } from "@repo/database/models/user";
 import type { CookieResponse } from "./lib/tokens";
-
 
 export interface AuthUser {
   id: string;
@@ -11,17 +10,23 @@ export interface AuthUser {
 }
 
 // Minimal structural interface — avoids importing @types/express into the shared package.
-// The actual express Request/Response types satisfy this structurally at call sites in apps/api.
+// The actual Express Request/Response types satisfy this structurally at call sites in apps/api.
 export interface ContextRequest {
   cookies?: Record<string, string | undefined>;
+  ip?: string;
+  headers?: Record<string, string | string[] | undefined>;
 }
 
+// jwtSecret is injected by the caller (apps/api/src/server.ts via adaptContext).
+// This keeps packages/trpc free of any dependency on apps/api's env or config.
 export async function createContext({
   req,
   res,
+  jwtSecret,
 }: {
   req: ContextRequest;
   res: CookieResponse;
+  jwtSecret: string;
 }) {
   let user: AuthUser | null = null;
 
@@ -29,8 +34,7 @@ export async function createContext({
 
   if (token) {
     try {
-      const secret = process.env.JWT_SECRET ?? "super-secret-key-change-in-production";
-      const payload = jwt.verify(token, secret) as {
+      const payload = jwt.verify(token, jwtSecret) as {
         sub: string;
         email: string;
         role: SelectUser["role"];
@@ -43,7 +47,8 @@ export async function createContext({
         emailVerifiedAt: payload.emailVerifiedAt,
       };
     } catch {
-      // invalid or expired token — user stays null
+      // Invalid or expired token — user stays null.
+      // auth.me will attempt refresh token fallback if needed.
     }
   }
 

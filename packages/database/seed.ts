@@ -2,12 +2,7 @@ import { scryptSync, randomBytes } from "node:crypto";
 import { db } from "./index";
 import { usersTable } from "./models/user";
 import { formsTable, fieldsTable, responsesTable, analyticsTable } from "./models/form";
-
-function hashPassword(password: string): string {
-  const salt = randomBytes(16).toString("hex");
-  const hash = scryptSync(password, salt, 64).toString("hex");
-  return `${salt}:${hash}`;
-}
+import bcrypt from 'bcrypt'
 
 async function seed() {
   console.log("starting seed...");
@@ -17,7 +12,7 @@ async function seed() {
   const [demoUser] = await db.insert(usersTable).values({
     fullName: "Demo User",
     email: "demo@somnia.io",
-    passwordHash: hashPassword("Demo@2025"),
+    passwordHash: await bcrypt.hash("Demo@2025", 12),
     role: "THE_ARCHITECT",
     emailVerifiedAt: new Date(),
   }).returning();
@@ -25,7 +20,7 @@ async function seed() {
   const [adminUser] = await db.insert(usersTable).values({
     fullName: "Admin Extractor",
     email: "admin@somnia.io",
-    passwordHash: hashPassword("Admin@2025"),
+    passwordHash: await bcrypt.hash("Demo@2025", 12),
     role: "THE_EXTRACTOR",
     emailVerifiedAt: new Date(),
   }).returning();

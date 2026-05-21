@@ -16,6 +16,13 @@ export const roleEnum = pgEnum("role_type", [
   "THE_SHADE",
 ]);
 
+export const subscriptionTierEnum = pgEnum("subscription_tier", [
+  "free",
+  "pro",
+  "team",
+]);
+
+
 export const usersTable = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
 
@@ -27,6 +34,9 @@ export const usersTable = pgTable("users", {
   passwordHash: varchar("password_hash", { length: 255 }),
   
   role: roleEnum("role").default("THE_ARCHITECT").notNull(),
+
+  subscriptionTier: subscriptionTierEnum("subscription_tier").default("free").notNull(),
+
 
   profileImageUrl: text("profile_image_url"),
 

@@ -34,7 +34,10 @@ const permissions: Record<Role, Action[]> = {
   ],
   THE_FORGER: ["viewForm", "editForm", "viewResponses"],
   THE_SHADE: ["viewForm"],
-  THE_DREAMER: ["viewForm"],
+  THE_DREAMER: [
+  "viewForm", "createForm", "editForm", "publishForm",
+  "deleteForm", "viewResponses", "inviteCollaborator", "manageUsers",
+  ],
 };
 
 export function can(role: Role, action: Action): boolean {

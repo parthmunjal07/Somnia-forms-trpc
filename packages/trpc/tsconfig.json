@@ -1,5 +1,13 @@
 {
-  "extends": ["@repo/typescript-config/node.json"],
-  "include": ["server/", "client/"],
-  "ignoreDeprecations" : "6.0"
+  "extends": [
+    "@repo/typescript-config/node.json"
+  ],
+  "include": [
+    "server/",
+    "client/",
+    "pagination.ts"
+  ],
+  "compilerOptions": {
+    "ignoreDeprecations": "6.0",
+  },
 }

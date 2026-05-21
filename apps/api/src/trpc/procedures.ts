@@ -1,8 +1,6 @@
-import { initTRPC, TRPCError } from "@trpc/server";
-import type { createContext } from "@repo/trpc/server";
+import { TRPCError } from "@trpc/server";
+import { t } from "@repo/trpc/server/trpc";
 import { can } from "../rbac";
-
-const t = initTRPC.context<typeof createContext>().create();
 
 export const router = t.router;
 

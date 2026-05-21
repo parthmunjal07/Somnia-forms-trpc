@@ -1,4 +1,4 @@
-export function createSuccess<T>(payload: { data: T; meta?: Record<string, any> }) {
+export function createSuccess<T>(payload: { data: T; meta?: Record<string, unknown> }) {
   return {
     success: true,
     data: payload.data,
