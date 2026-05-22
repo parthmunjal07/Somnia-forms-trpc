@@ -116,8 +116,22 @@ export const responsesTable = pgTable(
       .notNull(),
     responseValues: jsonb("response_values").notNull(), // { "field_id": "value" }
     submittedAt: timestamp("submitted_at").defaultNow().notNull(),
+    timeToComplete: integer("time_to_complete"),
+    isComplete: boolean("is_complete").default(false).notNull(),
   },
   (table) => [index("responses_form_id_idx").on(table.formId)]
+);
+
+export const formViewsTable = pgTable(
+  "form_views",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    formId: uuid("form_id")
+      .references(() => formsTable.id, { onDelete: "cascade" })
+      .notNull(),
+    viewedAt: timestamp("viewed_at").defaultNow().notNull(),
+  },
+  (table) => [index("form_views_form_id_idx").on(table.formId)]
 );
 
 export const analyticsTable = pgTable(
@@ -141,5 +155,7 @@ export type SelectField = typeof fieldsTable.$inferSelect;
 export type InsertField = typeof fieldsTable.$inferInsert;
 export type SelectResponse = typeof responsesTable.$inferSelect;
 export type InsertResponse = typeof responsesTable.$inferInsert;
+export type SelectFormView = typeof formViewsTable.$inferSelect;
+export type InsertFormView = typeof formViewsTable.$inferInsert;
 export type SelectAnalytics = typeof analyticsTable.$inferSelect;
 export type InsertAnalytics = typeof analyticsTable.$inferInsert;

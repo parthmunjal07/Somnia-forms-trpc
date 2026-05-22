@@ -194,16 +194,24 @@ export function FormRunner({ form, fields, passcode, styles }: FormRunnerProps) 
     return () => window.removeEventListener("keydown", handleGlobalKeyDown);
   }, [currentIndex, answers, currentField]);
 
+  const startedAt = useRef<number>(0);
+  useEffect(() => {
+    startedAt.current = Date.now();
+  }, []);
+
   // Submission endpoint triggers
   const handleSubmitForm = async () => {
     setSubmitStatus("submitting");
     setTotemStatus("spinning");
+
+    const elapsedSeconds = Math.max(1, Math.round((Date.now() - startedAt.current) / 1000));
 
     try {
       await submitMutation.mutateAsync({
         formId: form.id,
         data: answers,
         password: passcode,
+        timeToComplete: elapsedSeconds,
       });
 
       // Submit success: trigger "kick/flash" effect & totem deceleration

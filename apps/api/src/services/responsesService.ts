@@ -1,5 +1,5 @@
 import { db } from "@repo/database";
-import { responsesTable, formsTable, analyticsTable } from "@repo/database/models/form";
+import { responsesTable, formsTable, analyticsTable, fieldsTable } from "@repo/database/models/form";
 import { usersTable } from "@repo/database/models/user";
 import { eq, and, desc, sql } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
@@ -25,19 +25,27 @@ if (env.UPSTASH_REDIS_REST_URL && env.UPSTASH_REDIS_REST_TOKEN) {
   });
 }
 
+export interface ListResponsesFilter {
+  startDate?: string;
+  endDate?: string;
+  completed?: boolean;
+}
+
 export class ResponsesService {
   async getTierLimit(tier: string) {
     switch (tier) {
       case "free":
         return 100;
       case "pro":
+        return 1000;
       case "team":
+        return 5000;
       default:
         return Infinity;
     }
   }
 
-  async submit(formId: string, data: any, ip: string, password?: string) {
+  async submit(formId: string, data: any, ip: string, password?: string, timeToComplete?: number) {
     if (ratelimit) {
       const { success } = await ratelimit.limit(`submit_${formId}_${ip}`);
       if (!success) {
@@ -91,6 +99,7 @@ export class ResponsesService {
       ? Math.min(tierLimit, form.responseLimit)
       : tierLimit;
 
+    // Use responses count from responsesTable directly or from analyticsTable
     const [analytics] = await db
       .select({ submissionsCount: analyticsTable.submissionsCount })
       .from(analyticsTable)
@@ -117,12 +126,34 @@ export class ResponsesService {
       });
     }
 
+    // Determine completion state
+    const fields = await db
+      .select({
+        id: fieldsTable.id,
+        required: fieldsTable.required,
+      })
+      .from(fieldsTable)
+      .where(eq(fieldsTable.formId, formId));
+
+    let isComplete = true;
+    for (const field of fields) {
+      if (field.required) {
+        const val = parsedData.data?.[field.id];
+        if (val === undefined || val === null || val === "") {
+          isComplete = false;
+          break;
+        }
+      }
+    }
+
     return await db.transaction(async (tx) => {
       const [response] = await tx
         .insert(responsesTable)
         .values({
           formId,
           responseValues: parsedData.data,
+          timeToComplete: timeToComplete ?? null,
+          isComplete,
         })
         .returning();
 
@@ -132,23 +163,20 @@ export class ResponsesService {
           submissionsCount: sql`${analyticsTable.submissionsCount} + 1`,
         })
         .where(eq(analyticsTable.formId, formId));
-        
-      // Future Email Sending Logic - handled safely
-      // try {
-      //   await emailService.sendNotification(...);
-      // } catch (e) {
-      //   console.error("Failed to send notification email", e);
-      // }
 
       return response;
     });
   }
 
-  async list(formId: string, userId: string, opts: z.infer<typeof paginationInput>) {
+  async list(
+    formId: string, 
+    userId: string, 
+    opts: z.infer<typeof paginationInput> & ListResponsesFilter
+  ) {
     const role = await getUserFormRole(formId, userId);
     
-    if (!role || !can(role, "viewResponses")) {
-      throw new TRPCError({ code: "FORBIDDEN", message: "Insufficient permissions" });
+    if (!role || role === "THE_SHADE" || !can(role, "viewResponses")) {
+      throw new TRPCError({ code: "FORBIDDEN", message: "Access Revoked: Insufficient permissions to view responses" });
     }
 
     const limit = opts.limit + 1;
@@ -157,10 +185,22 @@ export class ResponsesService {
       offset = parseInt(opts.cursor, 10);
     }
 
+    // Build conditions for query filters
+    const conditions = [eq(responsesTable.formId, formId)];
+    if (opts.startDate) {
+      conditions.push(sql`${responsesTable.submittedAt} >= ${new Date(opts.startDate)}`);
+    }
+    if (opts.endDate) {
+      conditions.push(sql`${responsesTable.submittedAt} <= ${new Date(opts.endDate)}`);
+    }
+    if (opts.completed !== undefined) {
+      conditions.push(eq(responsesTable.isComplete, opts.completed));
+    }
+
     const responses = await db
       .select()
       .from(responsesTable)
-      .where(eq(responsesTable.formId, formId))
+      .where(and(...conditions))
       .orderBy(desc(responsesTable.submittedAt))
       .limit(limit)
       .offset(offset);
@@ -176,6 +216,74 @@ export class ResponsesService {
       items: responses,
       nextCursor,
     };
+  }
+
+  async exportCSV(formId: string, userId: string, filters?: ListResponsesFilter) {
+    const role = await getUserFormRole(formId, userId);
+    
+    if (!role || role === "THE_SHADE" || !can(role, "viewResponses")) {
+      throw new TRPCError({ code: "FORBIDDEN", message: "Access Revoked: Insufficient permissions to export responses" });
+    }
+
+    const fields = await db
+      .select({
+        id: fieldsTable.id,
+        label: fieldsTable.label,
+      })
+      .from(fieldsTable)
+      .where(eq(fieldsTable.formId, formId))
+      .orderBy(fieldsTable.order);
+
+    const conditions = [eq(responsesTable.formId, formId)];
+    if (filters?.startDate) {
+      conditions.push(sql`${responsesTable.submittedAt} >= ${new Date(filters.startDate)}`);
+    }
+    if (filters?.endDate) {
+      conditions.push(sql`${responsesTable.submittedAt} <= ${new Date(filters.endDate)}`);
+    }
+    if (filters?.completed !== undefined) {
+      conditions.push(eq(responsesTable.isComplete, filters.completed));
+    }
+
+    const responses = await db
+      .select()
+      .from(responsesTable)
+      .where(and(...conditions))
+      .orderBy(desc(responsesTable.submittedAt));
+
+    const escapeCSV = (val: any): string => {
+      if (val === null || val === undefined) return '""';
+      let stringVal = "";
+      if (typeof val === "object") {
+        stringVal = JSON.stringify(val);
+      } else {
+        stringVal = String(val);
+      }
+      return `"${stringVal.replace(/"/g, '""')}"`;
+    };
+
+    const headers = ["Submission ID", "Submitted At", "Completion Time (sec)", "Is Complete"];
+    fields.forEach((f) => {
+      headers.push(f.label);
+    });
+
+    const csvLines = [headers.map(escapeCSV).join(",")];
+
+    responses.forEach((resp) => {
+      const line = [
+        resp.id,
+        resp.submittedAt.toISOString(),
+        resp.timeToComplete !== null ? String(resp.timeToComplete) : "",
+        resp.isComplete ? "TRUE" : "FALSE",
+      ];
+      fields.forEach((f) => {
+        const val = (resp.responseValues as Record<string, any>)[f.id];
+        line.push(val);
+      });
+      csvLines.push(line.map(escapeCSV).join(","));
+    });
+
+    return csvLines.join("\n");
   }
 }
 

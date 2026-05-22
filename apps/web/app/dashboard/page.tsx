@@ -333,6 +333,24 @@ const handleLogout = async () => {
                         <Trash2 size={13} />
                       </button>
 
+                      {/* Analytics Option */}
+                      {!isShade ? (
+                        <button
+                          onClick={() => router.push(`/dashboard/forms/${item.id}/analytics`)}
+                          className="flex items-center space-x-1 px-2.5 py-1.5 bg-amber-950/20 hover:bg-amber-900/30 border border-amber-900/40 hover:border-amber-500/55 text-amber-400 rounded text-[10px] uppercase font-bold tracking-widest transition-all cursor-pointer"
+                        >
+                          <span>Analytics</span>
+                        </button>
+                      ) : (
+                        <button
+                          disabled
+                          title="THE_SHADE is blocked from viewing analytics"
+                          className="flex items-center space-x-1 px-2.5 py-1.5 bg-stone-950/50 border border-stone-900 text-stone-600 rounded text-[10px] uppercase font-bold tracking-widest cursor-not-allowed opacity-40"
+                        >
+                          <span>Analytics</span>
+                        </button>
+                      )}
+
                       {/* Launch Builder */}
                       <button
                         onClick={() => router.push(`/dashboard/forms/${item.id}/build`)}

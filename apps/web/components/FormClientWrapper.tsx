@@ -58,6 +58,15 @@ export function FormClientWrapper({ slug, initialData }: FormClientWrapperProps)
   const skin = currentData.form?.theme ?? "classic-dark";
   const styles = getSkinStyles(skin);
 
+  const incrementViews = trpc.analytics.incrementViews.useMutation();
+
+  useEffect(() => {
+    if (currentData.form?.id) {
+      incrementViews.mutate({ formId: currentData.form.id });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentData.form?.id]);
+
   // 1. Checking sessionStorage cache
   if (checkingCache) {
     return (
