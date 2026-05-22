@@ -35,7 +35,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   }, [isAuthenticated, setUser, clearUser, setLoading]);
 
   useEffect(() => {
-    if (!loading && !isAuthenticated && !pathname.startsWith("/login") && !pathname.startsWith("/s/")) {
+    if (!loading && !isAuthenticated && !pathname.startsWith("/login") && !pathname.startsWith("/s/") && !pathname.startsWith("/f/")) {
       router.push("/login");
     }
   }, [loading, isAuthenticated, pathname, router]);

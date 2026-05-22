@@ -34,6 +34,7 @@ export const fieldsRouter = router({
       type: fieldTypeEnum,
       required: z.boolean().default(false),
       options: z.any().optional(),
+      validationRules: z.any().optional(),
       order: z.number().int().min(0),
     }))
     .mutation(async ({ input, ctx }: { input: any, ctx: any }) => {
@@ -49,6 +50,7 @@ export const fieldsRouter = router({
       type: fieldTypeEnum.optional(),
       required: z.boolean().optional(),
       options: z.any().optional(),
+      validationRules: z.any().optional(),
       order: z.number().int().min(0).optional(),
     }))
     .mutation(async ({ input, ctx }: { input: any, ctx: any }) => {

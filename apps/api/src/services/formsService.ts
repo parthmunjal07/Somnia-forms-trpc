@@ -165,7 +165,7 @@ export class FormsService {
     }
 
     if (form.status !== "published") {
-      throw new TRPCError({ code: "FORBIDDEN", message: "Form is not published" });
+      return { form: { id: form.id, title: form.title, theme: form.theme }, unpublished: true };
     }
 
     // Expiry check
@@ -204,6 +204,29 @@ export class FormsService {
     return { form, fields };
   }
 
+  async verifyPassword(slug: string, password?: string) {
+    const [form] = await db
+      .select({ passwordHash: formsTable.passwordHash })
+      .from(formsTable)
+      .where(eq(formsTable.slug, slug))
+      .limit(1);
+
+    if (!form) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "Form not found" });
+    }
+
+    if (!form.passwordHash) {
+      return { success: true };
+    }
+
+    if (!password) {
+      return { success: false };
+    }
+
+    const match = await bcrypt.compare(password, form.passwordHash);
+    return { success: match };
+  }
+
   async update(
     formId: string,
     data: Partial<{
@@ -216,6 +239,7 @@ export class FormsService {
       expiresAt: string | null;
       password: string | null;
       thankYouMessage: string | null;
+      redirectUrl: string | null;
     }>,
     userId: string
   ) {
@@ -295,6 +319,7 @@ export class FormsService {
           expiresAt: sourceForm.expiresAt,
           passwordHash: sourceForm.passwordHash,
           thankYouMessage: sourceForm.thankYouMessage,
+          redirectUrl: sourceForm.redirectUrl,
         })
         .returning();
 
@@ -316,6 +341,7 @@ export class FormsService {
             required: f.required,
             placeholder: f.placeholder,
             options: f.options,
+            validationRules: f.validationRules,
             order: f.order,
           }))
         );

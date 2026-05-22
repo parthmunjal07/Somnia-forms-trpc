@@ -8,6 +8,7 @@ import bcrypt from "bcryptjs";
 import { randomBytes } from "node:crypto";
 import { TRPCError } from "@trpc/server";
 import {
+  clearTokenCookies,
   generateTokens,
   setTokenCookies,
   verifyAccessToken,
@@ -276,5 +277,15 @@ export const authRouter = router({
         .set({ subscriptionTier: input.tier })
         .where(eq(usersTable.id, ctx.user.id));
       return { success: true, tier: input.tier };
+    }),
+
+    logout: publicProcedure
+    .meta({ openapi: { method: "POST", path: getPath("/logout"), tags: TAGS } })
+    .input(z.undefined())
+    .output(z.object({ message: z.string() }))
+    .mutation(({ ctx }) => {
+      // Instructs Express to clear the httpOnly cookies from the browser
+      clearTokenCookies(ctx.res); 
+      return { message: "Logged out successfully" };
     }),
 });

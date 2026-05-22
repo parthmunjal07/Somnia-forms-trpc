@@ -19,6 +19,8 @@ import {
   Lock,
   Layers,
   Sparkles,
+  Info,
+  EyeOff,
 } from "lucide-react";
 
 export default function DashboardPage() {
@@ -99,19 +101,20 @@ export default function DashboardPage() {
     });
   };
 
-  const handleLogout = async () => {
-    // We can clear cookie by calling api, but since we are in client, we can clear store & redirect
+  const logoutMutation = trpc.auth.logout.useMutation();
+
+const handleLogout = async () => {
+      // We can clear cookie by calling api, but since we are in client, we can clear store & redirect
     // And to clear the cookies on backend, let's call a logout procedure if it exists.
     // If it doesn't, we can just clear user state.
     // Let's check: does trpc have a logout endpoint? Let's check our auth router.
     // We did not see a logout procedure. That's fine! Clearing the cookie is usually done on reload or we can clear token manually.
     // Let's write a simple document cookie clearing mechanism just in case.
-    document.cookie = "access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
-    document.cookie = "refresh_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
-    clearUser();
-    toast.success("You have woken up.");
-    router.push("/login");
-  };
+  await logoutMutation.mutateAsync(); // Tells Express to clear httpOnly cookies
+  clearUser();                        // Clears Zustand
+  toast.success("You have woken up.");
+  router.push("/login");
+};
 
   return (
     <div className="min-h-screen bg-stone-950 text-stone-200 font-mono flex flex-col selection:bg-emerald-500/30">
@@ -149,6 +152,19 @@ export default function DashboardPage() {
 
       {/* Main Workspace Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto p-6 md:p-8 space-y-8 z-10">
+
+        {/* Observer Mode Banner — appears when user is THE_SHADE on at least one form */}
+        {!isFormsLoading && formsData?.items?.some((f) => f.role === "THE_SHADE") && (
+          <div className="flex items-start space-x-3 bg-amber-950/20 border border-amber-900/40 rounded p-4 text-amber-500 animate-in fade-in duration-500">
+            <EyeOff size={16} className="mt-0.5 shrink-0 animate-pulse" />
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-widest">Observer Mode Active</p>
+              <p className="text-[9px] text-amber-600 mt-1 leading-relaxed uppercase tracking-wider">
+                One or more dreamscapes in your workspace were shared with you as <strong className="text-amber-500">THE_SHADE</strong>. You have read-only observation access — you can view and inspect but cannot modify, clone, or delete these layers.
+              </p>
+            </div>
+          </div>
+        )}
         
         {/* Upper Title Area */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -196,12 +212,26 @@ export default function DashboardPage() {
               return (
                 <div
                   key={item.id}
-                  className="group relative bg-stone-900/25 border border-stone-850 hover:border-stone-700/80 rounded p-6 flex flex-col justify-between transition-all duration-300 hover:shadow-[0_4px_30px_rgba(0,0,0,0.4)]"
+                  className={`group relative bg-stone-900/25 border rounded p-6 flex flex-col justify-between transition-all duration-300 ${
+                    isShade
+                      ? "border-amber-900/30 hover:border-amber-800/50 hover:shadow-[0_4px_30px_rgba(180,100,0,0.15)]"
+                      : "border-stone-850 hover:border-stone-700/80 hover:shadow-[0_4px_30px_rgba(0,0,0,0.4)]"
+                  }`}
                 >
-                  {/* Subtle hover accent line */}
-                  <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-stone-800 via-stone-700 to-stone-800 group-hover:from-emerald-600/40 group-hover:via-emerald-500/50 group-hover:to-teal-500/40 transition-all duration-500" />
+                  {/* Observer Mode Ribbon for THE_SHADE */}
+                  {isShade && (
+                    <div className="absolute top-0 left-0 right-0 flex items-center justify-center space-x-1.5 bg-amber-950/30 border-b border-amber-900/40 py-1 px-3 rounded-t text-amber-600 text-[8px] uppercase tracking-[0.2em] font-bold">
+                      <EyeOff size={9} />
+                      <span>Observer Mode — Read Only</span>
+                    </div>
+                  )}
+                  {/* Subtle hover accent line — hidden when shade ribbon is active */}
+                  {!isShade && (
+                    <div className="absolute top-0 left-0 right-0 h-[1.5px] bg-gradient-to-r from-stone-800 via-stone-700 to-stone-800 group-hover:from-emerald-600/40 group-hover:via-emerald-500/50 group-hover:to-teal-500/40 transition-all duration-500" />
+                  )}
 
-                  {/* Card Content Top */}
+                  {/* Card Content Top — add top padding when shade ribbon is visible */}
+                  <div className={isShade ? "mt-5" : ""}>
                   <div className="space-y-4">
                     <div className="flex items-start justify-between">
                       <div>
@@ -209,7 +239,7 @@ export default function DashboardPage() {
                           {item.title}
                         </h3>
                         <p className="text-[10px] text-stone-500 mt-1 select-all cursor-pointer">
-                          /s/{item.slug}
+                          /f/{item.slug}
                         </p>
                       </div>
 
@@ -253,6 +283,7 @@ export default function DashboardPage() {
                         <span>{item.submissionsCount} submissions</span>
                       </div>
                     </div>
+                  </div>
                   </div>
 
                   {/* Card Actions Bottom */}
@@ -374,7 +405,7 @@ export default function DashboardPage() {
                   Subconscious Slug / Path URL
                 </label>
                 <div className="relative flex items-center">
-                  <span className="absolute left-3 text-stone-600 text-xs select-none">/s/</span>
+                  <span className="absolute left-3 text-stone-600 text-xs select-none">/f/</span>
                   <input
                     type="text"
                     required

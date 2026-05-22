@@ -29,17 +29,40 @@ export async function compileFormSchema(formId: string) {
 
     switch (field.type) {
       case "short_text":
-      case "long_text":
-        fieldSchema = z.string();
+      case "long_text": {
+        let stringSchema = z.string();
+        const rules = field.validationRules as Record<string, any> | null;
+        if (rules) {
+          if (typeof rules.minLength === "number") stringSchema = stringSchema.min(rules.minLength);
+          if (typeof rules.maxLength === "number") stringSchema = stringSchema.max(rules.maxLength);
+          if (typeof rules.pattern === "string") stringSchema = stringSchema.regex(new RegExp(rules.pattern));
+        }
+        fieldSchema = stringSchema;
         break;
+      }
 
-      case "email":
-        fieldSchema = z.string().email();
+      case "email": {
+        let emailSchema = z.string();
+        const rules = field.validationRules as Record<string, any> | null;
+        if (rules) {
+          if (typeof rules.minLength === "number") emailSchema = emailSchema.min(rules.minLength);
+          if (typeof rules.maxLength === "number") emailSchema = emailSchema.max(rules.maxLength);
+          if (typeof rules.pattern === "string") emailSchema = emailSchema.regex(new RegExp(rules.pattern));
+        }
+        fieldSchema = emailSchema.email();
         break;
+      }
 
-      case "number":
-        fieldSchema = z.coerce.number();
+      case "number": {
+        let numSchema = z.coerce.number();
+        const rules = field.validationRules as Record<string, any> | null;
+        if (rules) {
+          if (typeof rules.min === "number") numSchema = numSchema.min(rules.min);
+          if (typeof rules.max === "number") numSchema = numSchema.max(rules.max);
+        }
+        fieldSchema = numSchema;
         break;
+      }
 
       case "single_select": {
         const opts = field.options as string[] | null;

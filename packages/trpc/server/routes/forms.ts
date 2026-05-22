@@ -36,6 +36,24 @@ export const formsRouter = router({
       return formsService.getPublicForm(input.slug, input.password);
     }),
 
+  getBySlug: publicProcedure
+    .input(z.object({
+      slug: z.string(),
+      password: z.string().optional(),
+    }))
+    .query(async ({ input }: { input: any }) => {
+      return formsService.getPublicForm(input.slug, input.password);
+    }),
+
+  verifyPasswordGate: publicProcedure
+    .input(z.object({
+      slug: z.string(),
+      password: z.string(),
+    }))
+    .mutation(async ({ input }: { input: any }) => {
+      return formsService.verifyPassword(input.slug, input.password);
+    }),
+
   update: protectedProcedure
     .input(z.object({
       id: z.string(),
@@ -48,6 +66,7 @@ export const formsRouter = router({
       expiresAt: z.string().nullable().optional(),
       password: z.string().nullable().optional(),
       thankYouMessage: z.string().nullable().optional(),
+      redirectUrl: z.string().url().nullable().optional(),
     }))
     .mutation(async ({ input, ctx }: { input: any, ctx: any }) => {
       const { id, ...data } = input;

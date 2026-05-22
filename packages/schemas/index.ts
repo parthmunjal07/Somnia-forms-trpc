@@ -1,5 +1,13 @@
 import { z } from "zod";
 
+export const validationRulesSchema = z.object({
+  minLength: z.number().int().min(0).optional(),
+  maxLength: z.number().int().min(0).optional(),
+  min: z.number().optional(),
+  max: z.number().optional(),
+  pattern: z.string().optional(),
+}).optional();
+
 export const createFormSchema = z.object({
   title: z.string().min(1, "Title is required").max(255),
   slug: z
@@ -11,6 +19,7 @@ export const createFormSchema = z.object({
       "Slug must only contain lowercase letters, numbers, and hyphens"
     ),
   visibility: z.enum(["public", "unlisted"]).optional(),
+  redirectUrl: z.string().url("Invalid redirect URL").nullable().optional(),
 });
 
 export const updateFormSchema = z.object({
@@ -26,6 +35,7 @@ export const updateFormSchema = z.object({
     .optional(),
   status: z.enum(["draft", "published", "archived"]).optional(),
   visibility: z.enum(["public", "unlisted"]).optional(),
+  redirectUrl: z.string().url("Invalid redirect URL").nullable().optional(),
 });
 
 export const addFieldSchema = z.object({
@@ -45,6 +55,7 @@ export const addFieldSchema = z.object({
   required: z.boolean().default(false),
   placeholder: z.string().optional(),
   options: z.array(z.string()).optional(),
+  validationRules: validationRulesSchema,
   order: z.number().int(),
 });
 
@@ -66,6 +77,7 @@ export const updateFieldSchema = z.object({
   required: z.boolean().optional(),
   placeholder: z.string().optional(),
   options: z.array(z.string()).optional(),
+  validationRules: validationRulesSchema,
   order: z.number().int().optional(),
 });
 

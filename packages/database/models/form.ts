@@ -57,6 +57,7 @@ export const formsTable = pgTable(
     expiresAt: timestamp("expires_at"),
     passwordHash: varchar("password_hash", { length: 255 }),
     thankYouMessage: text("thank_you_message"),
+    redirectUrl: text("redirect_url"),
     createdAt: timestamp("created_at").defaultNow(),
     updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
   },
@@ -98,6 +99,7 @@ export const fieldsTable = pgTable(
     required: boolean("required").default(false).notNull(),
     placeholder: text("placeholder"),
     options: jsonb("options"), // array of strings for dropdowns/checkboxes
+    validationRules: jsonb("validation_rules"),
     order: integer("order").notNull(),
     createdAt: timestamp("created_at").defaultNow(),
     updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
