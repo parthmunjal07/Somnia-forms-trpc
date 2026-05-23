@@ -5,43 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1767592965691,
-      "tag": "0000_dusty_morg",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1779276771649,
-      "tag": "0001_long_shadow_king",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1779276771650,
-      "tag": "0002_phase3_email_verified_at",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1779276771651,
-      "tag": "0003_subscription_tier",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1779384532794,
-      "tag": "0004_cuddly_doctor_octopus",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1779472726156,
-      "tag": "0005_round_blonde_phantom",
+      "when": 1779560525663,
+      "tag": "0000_colorful_bill_hollister",
       "breakpoints": true
     }
   ]

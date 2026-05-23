@@ -7,7 +7,9 @@ import helmet from "helmet";
 import cookieParser from "cookie-parser";
 import { rateLimit } from "express-rate-limit";
 import { randomBytes } from "node:crypto";
-
+import passport from "./auth/passport";
+import { generateTokens, setTokenCookies } from "@repo/trpc/server/lib/tokens";
+import type { SelectUser } from "@repo/database/schema";
 import * as trpcExpress from "@trpc/server/adapters/express";
 import type { CreateExpressContextOptions } from "@trpc/server/adapters/express";
 import { generateOpenApiDocument, createOpenApiExpressMiddleware } from "trpc-to-openapi";
@@ -45,6 +47,9 @@ app.use(
 
 // ─── Cookie Parser ────────────────────────────────────────────────────────────
 app.use(cookieParser());
+
+// ─── Passport Auth ────────────────────────────────────────────────────────────
+app.use(passport.initialize());
 
 // ─── Body Size Limits ─────────────────────────────────────────────────────────
 app.use(express.json({ limit: "50kb" }));
@@ -144,6 +149,37 @@ app.use((req, res, next) => {
   }
   return next();
 });
+
+// ─── Google OAuth Routes ──────────────────────────────────────────────────────
+app.get("/api/auth/google", (req, res, next) => {
+  if (!env.GOOGLE_OAUTH_CLIENT_ID) {
+    return res.redirect(`${env.FRONTEND_URL}/login?error=oauth_not_configured`);
+  }
+  passport.authenticate("google", { scope: ["profile", "email"] })(req, res, next);
+});
+
+app.get(
+  "/api/auth/google/callback",
+  (req, res, next) => {
+    if (!env.GOOGLE_OAUTH_CLIENT_ID) {
+      return res.redirect(`${env.FRONTEND_URL}/login?error=oauth_not_configured`);
+    }
+    passport.authenticate("google", { session: false, failureRedirect: `${env.FRONTEND_URL}/login?error=oauth_failed` })(req, res, next);
+  },
+  (req, res) => {
+    const user = req.user as SelectUser;
+    if (!user) {
+      return res.redirect(`${env.FRONTEND_URL}/login?error=oauth_failed`);
+    }
+
+    const tokens = generateTokens(user);
+    // Cast res to any to avoid type issues with express vs minimal CookieResponse
+    setTokenCookies(res as any, tokens);
+    
+    // Redirect to frontend dashboard or home
+    res.redirect(`${env.FRONTEND_URL}/dashboard`);
+  }
+);
 
 // ─── OpenAPI Document ─────────────────────────────────────────────────────────
 const openApiDocument = generateOpenApiDocument(serverRouter, {
