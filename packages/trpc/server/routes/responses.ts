@@ -11,6 +11,26 @@ const responseFilterSchema = z.object({
 
 export const responsesRouter = router({
   submit: publicProcedure
+    .meta({
+      openapi: {
+        method: "POST",
+        path: "/responses/submit",
+        tags: ["Responses"],
+        summary: "Submit form response",
+        description: "Submit a response to a published form.\n\n" +
+          "### Rate Limiting\n" +
+          "This endpoint is rate limited to 30 requests per minute per IP.\n" +
+          "Headers `X-RateLimit-Remaining` and `Retry-After` are returned if exceeded.\n\n" +
+          "### Validation Errors\n" +
+          "If submission data is invalid, returns a `400 Bad Request` with a Zod error shape detailing specific field errors.\n\n" +
+          "### Example (cURL)\n" +
+          "```bash\n" +
+          "curl -X POST https://api.somnia.io/api/responses/submit \\\n" +
+          "  -H 'Content-Type: application/json' \\\n" +
+          "  -d '{\"formId\": \"uuid-here\", \"data\": {\"field_1\": \"answer\"}}'\n" +
+          "```",
+      },
+    })
     .input(z.object({
       formId: z.string(),
       data: z.any(),
@@ -29,6 +49,23 @@ export const responsesRouter = router({
     }),
 
   list: protectedProcedure
+    .meta({
+      openapi: {
+        method: "GET",
+        path: "/forms",
+        tags: ["Forms"],
+        protect: true,
+        summary: "List user's forms",
+        description: "// NOTE: keep this RBAC table in sync with apps/api/src/rbac.ts\n\n" +
+          "| Role | Can access |\n" +
+          "|---|---|\n" +
+          "| THE_ARCHITECT | ✓ |\n" +
+          "| THE_EXTRACTOR | ✓ |\n" +
+          "| THE_FORGER | ✓ |\n" +
+          "| THE_SHADE | ✓ |\n\n" +
+          "Lists forms the authenticated user owns or collaborates on.",
+      },
+    })
     .input(
       z.object({
         formId: z.string(),

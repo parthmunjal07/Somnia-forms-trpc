@@ -16,18 +16,58 @@ const fieldTypeEnum = z.enum([
 
 export const fieldsRouter = router({
   list: protectedProcedure
+    .meta({
+      openapi: {
+        method: "GET",
+        path: "/fields",
+        tags: ["Fields"],
+        protect: true,
+        summary: "List fields for a form",
+        description: "// NOTE: keep this RBAC table in sync with apps/api/src/rbac.ts\n\n" +
+          "| Role | Can access |\n" +
+          "|---|---|\n" +
+          "| THE_ARCHITECT | ✓ |\n" +
+          "| THE_EXTRACTOR | ✗ |\n" +
+          "| THE_FORGER | ✓ |\n" +
+          "| THE_SHADE | ✗ |",
+      },
+    })
     .input(z.object({ formId: z.string() }))
     .query(async ({ input, ctx }: { input: any, ctx: any }) => {
       return fieldsService.list(input.formId, ctx.user.id);
     }),
 
   getPublic: publicProcedure
+    .meta({
+      openapi: {
+        method: "GET",
+        path: "/fields/public/{formId}",
+        tags: ["Fields"],
+        summary: "Get public fields for a form",
+      },
+    })
     .input(z.object({ formId: z.string() }))
-    .query(async ({ input }: { input: any}) => {
+    .query(async ({ input }: { input: any }) => {
       return fieldsService.getPublicFields(input.formId);
     }),
 
   create: protectedProcedure
+    .meta({
+      openapi: {
+        method: "POST",
+        path: "/fields",
+        tags: ["Fields"],
+        protect: true,
+        summary: "Create a field",
+        description: "// NOTE: keep this RBAC table in sync with apps/api/src/rbac.ts\n\n" +
+          "| Role | Can access |\n" +
+          "|---|---|\n" +
+          "| THE_ARCHITECT | ✓ |\n" +
+          "| THE_EXTRACTOR | ✗ |\n" +
+          "| THE_FORGER | ✓ |\n" +
+          "| THE_SHADE | ✗ |",
+      },
+    })
     .input(z.object({
       formId: z.string(),
       label: z.string().min(1),
@@ -43,6 +83,22 @@ export const fieldsRouter = router({
     }),
 
   update: protectedProcedure
+    .meta({
+      openapi: {
+        method: "PATCH",
+        path: "/fields/{id}",
+        tags: ["Fields"],
+        protect: true,
+        summary: "Update a field",
+        description: "// NOTE: keep this RBAC table in sync with apps/api/src/rbac.ts\n\n" +
+          "| Role | Can access |\n" +
+          "|---|---|\n" +
+          "| THE_ARCHITECT | ✓ |\n" +
+          "| THE_EXTRACTOR | ✗ |\n" +
+          "| THE_FORGER | ✓ |\n" +
+          "| THE_SHADE | ✗ |",
+      },
+    })
     .input(z.object({
       id: z.string(),
       formId: z.string(),
@@ -59,12 +115,44 @@ export const fieldsRouter = router({
     }),
 
   delete: protectedProcedure
+    .meta({
+      openapi: {
+        method: "DELETE",
+        path: "/fields/{id}",
+        tags: ["Fields"],
+        protect: true,
+        summary: "Delete a field",
+        description: "// NOTE: keep this RBAC table in sync with apps/api/src/rbac.ts\n\n" +
+          "| Role | Can access |\n" +
+          "|---|---|\n" +
+          "| THE_ARCHITECT | ✓ |\n" +
+          "| THE_EXTRACTOR | ✗ |\n" +
+          "| THE_FORGER | ✓ |\n" +
+          "| THE_SHADE | ✗ |",
+      },
+    })
     .input(z.object({ id: z.string(), formId: z.string() }))
     .mutation(async ({ input, ctx }: { input: any, ctx: any }) => {
       return fieldsService.delete(input.id, input.formId, ctx.user.id);
     }),
 
   reorder: protectedProcedure
+    .meta({
+      openapi: {
+        method: "POST",
+        path: "/fields/reorder",
+        tags: ["Fields"],
+        protect: true,
+        summary: "Reorder fields",
+        description: "// NOTE: keep this RBAC table in sync with apps/api/src/rbac.ts\n\n" +
+          "| Role | Can access |\n" +
+          "|---|---|\n" +
+          "| THE_ARCHITECT | ✓ |\n" +
+          "| THE_EXTRACTOR | ✗ |\n" +
+          "| THE_FORGER | ✓ |\n" +
+          "| THE_SHADE | ✗ |",
+      },
+    })
     .input(z.object({
       formId: z.string(),
       fieldIds: z.array(z.string()),

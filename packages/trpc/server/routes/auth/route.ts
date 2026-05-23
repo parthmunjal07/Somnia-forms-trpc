@@ -270,8 +270,26 @@ export const authRouter = router({
     }),
 
   upgradeTier: protectedProcedure
+    .meta({
+      openapi: {
+        method: "POST",
+        path: getPath("/upgrade-tier"),
+        tags: TAGS,
+        protect: true,
+        summary: "Upgrade subscription tier",
+        description: "Updates the authenticated user's subscription tier. Note: Cannot modify the demo account.",
+      },
+    })
     .input(z.object({ tier: z.enum(["free", "pro", "team"]) }))
-    .mutation(async ({ input, ctx }: { input: any, ctx: any }) => {
+    .output(z.object({ success: z.boolean(), tier: z.enum(["free", "pro", "team"]) }))
+    .mutation(async ({ input, ctx }) => {
+      // Prevent modifying the demo account via API
+      if (ctx.user.email === "demo@somnia.io") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Demo account tier cannot be modified via API"
+        });
+      }
       await db
         .update(usersTable)
         .set({ subscriptionTier: input.tier })
@@ -279,13 +297,13 @@ export const authRouter = router({
       return { success: true, tier: input.tier };
     }),
 
-    logout: publicProcedure
+  logout: publicProcedure
     .meta({ openapi: { method: "POST", path: getPath("/logout"), tags: TAGS } })
     .input(z.undefined())
     .output(z.object({ message: z.string() }))
     .mutation(({ ctx }) => {
       // Instructs Express to clear the httpOnly cookies from the browser
-      clearTokenCookies(ctx.res); 
+      clearTokenCookies(ctx.res);
       return { message: "Logged out successfully" };
     }),
 });
