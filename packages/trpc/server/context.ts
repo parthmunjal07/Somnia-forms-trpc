@@ -30,7 +30,15 @@ export async function createContext({
 }) {
   let user: AuthUser | null = null;
 
-  const token = req.cookies?.access_token;
+  let token = req.cookies?.access_token;
+
+  if (!token && req.headers?.authorization) {
+    const authHeader = req.headers.authorization;
+    const parts = typeof authHeader === "string" ? authHeader.split(" ") : [];
+    if (parts.length === 2 && parts[0]?.toLowerCase() === "bearer") {
+      token = parts[1];
+    }
+  }
 
   if (token) {
     try {

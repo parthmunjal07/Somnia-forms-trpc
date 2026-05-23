@@ -93,17 +93,31 @@ app.use((req, res, next) => {
     return next();
   }
 
-  // CSRF init endpoint is exempt by definition
-  if (req.path === "/api/csrf") {
+  // Exempt REST API endpoints under /api/ (e.g. /api/auth/register, /api/forms, etc.)
+  // These are typically accessed via Bearer tokens (programmatically or via Scalar UI docs)
+  if (req.path.startsWith("/api/")) {
     return next();
   }
 
   // For tRPC batch requests the path is: /trpc/proc1,proc2,proc3
-  // Split by comma and check if any procedure in the batch is exempt.
-  // responses.submit is public and unauthenticated — CSRF doesn't apply.
+  // Split by comma and check if all procedures in the batch are exempt.
+  // Unauthenticated/public mutations do not need CSRF validation.
   if (req.path.startsWith("/trpc/")) {
-    const procedures = req.path.replace("/trpc/", "").split(",").map((p) => p.trim());
-    if (procedures.includes("responses.submit")) {
+    const procedures = req.path
+      .replace("/trpc/", "")
+      .split(",")
+      .map((p) => p.trim());
+    const exemptProcedures = [
+      "responses.submit",
+      "auth.register",
+      "auth.login",
+      "auth.sendVerification",
+      "auth.verifyEmail",
+      "auth.logout",
+      "analytics.incrementViews",
+      "forms.verifyPasswordGate",
+    ];
+    if (procedures.every((p) => exemptProcedures.includes(p))) {
       return next();
     }
   }

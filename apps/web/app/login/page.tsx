@@ -22,7 +22,10 @@ export default function LoginPage() {
       router.push("/dashboard");
     },
     onError: (error) => {
-      toast.error(error.message || "Failed to establish dream state connection.");
+      // Surface the first Zod validation issue if available, otherwise use the server message
+      const zodMessage = (error.data as any)?.zodError?.fieldErrors &&
+        Object.values((error.data as any).zodError.fieldErrors).flat()[0];
+      toast.error((zodMessage as string) || error.message || "Failed to establish dream state connection.");
     },
   });
 
@@ -34,7 +37,10 @@ export default function LoginPage() {
       setPassword("");
     },
     onError: (error) => {
-      toast.error(error.message || "Failed to forge new identity.");
+      // Surface the first Zod validation issue if available (e.g. password strength rules)
+      const zodMessage = (error.data as any)?.zodError?.fieldErrors &&
+        Object.values((error.data as any).zodError.fieldErrors).flat()[0];
+      toast.error((zodMessage as string) || error.message || "Failed to forge new identity.");
     },
   });
 
