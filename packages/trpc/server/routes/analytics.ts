@@ -28,10 +28,14 @@ export const analyticsRouter = router({
     })
     .input(z.object({
       formId: z.string(),
-      filters: analyticsFilterSchema,
+      startDate: z.string().optional(),
+      endDate: z.string().optional(),
+      completed: z.boolean().optional(),
     }))
+    .output(z.any())
     .query(async ({ input, ctx }) => {
-      return analyticsService.getSummary(input.formId, ctx.user.id, input.filters);
+      const { formId, ...filters } = input;
+      return analyticsService.getSummary(formId, ctx.user.id, filters);
     }),
 
   getFieldDropoffs: protectedProcedure
@@ -53,10 +57,14 @@ export const analyticsRouter = router({
     })
     .input(z.object({
       formId: z.string(),
-      filters: analyticsFilterSchema,
+      startDate: z.string().optional(),
+      endDate: z.string().optional(),
+      completed: z.boolean().optional(),
     }))
+    .output(z.any())
     .query(async ({ input, ctx }) => {
-      return analyticsService.getFieldDropoffs(input.formId, ctx.user.id, input.filters);
+      const { formId, ...filters } = input;
+      return analyticsService.getFieldDropoffs(formId, ctx.user.id, filters);
     }),
 
   getDailyStats: protectedProcedure
@@ -78,10 +86,14 @@ export const analyticsRouter = router({
     })
     .input(z.object({
       formId: z.string(),
-      filters: analyticsFilterSchema,
+      startDate: z.string().optional(),
+      endDate: z.string().optional(),
+      completed: z.boolean().optional(),
     }))
+    .output(z.any())
     .query(async ({ input, ctx }) => {
-      return analyticsService.getDailyStats(input.formId, ctx.user.id, input.filters);
+      const { formId, ...filters } = input;
+      return analyticsService.getDailyStats(formId, ctx.user.id, filters);
     }),
 
   getFieldDistributions: protectedProcedure
@@ -103,10 +115,14 @@ export const analyticsRouter = router({
     })
     .input(z.object({
       formId: z.string(),
-      filters: analyticsFilterSchema,
+      startDate: z.string().optional(),
+      endDate: z.string().optional(),
+      completed: z.boolean().optional(),
     }))
+    .output(z.any())
     .query(async ({ input, ctx }) => {
-      return analyticsService.getFieldDistributions(input.formId, ctx.user.id, input.filters);
+      const { formId, ...filters } = input;
+      return analyticsService.getFieldDistributions(formId, ctx.user.id, filters);
     }),
 
   incrementViews: publicProcedure
@@ -119,6 +135,7 @@ export const analyticsRouter = router({
       },
     })
     .input(z.object({ formId: z.string() }))
+    .output(z.any())
     .mutation(async ({ input }) => {
       await analyticsService.incrementViews(input.formId);
       return { success: true };

@@ -33,6 +33,7 @@ export const fieldsRouter = router({
       },
     })
     .input(z.object({ formId: z.string() }))
+    .output(z.any())
     .query(async ({ input, ctx }: { input: any, ctx: any }) => {
       return fieldsService.list(input.formId, ctx.user.id);
     }),
@@ -47,6 +48,7 @@ export const fieldsRouter = router({
       },
     })
     .input(z.object({ formId: z.string() }))
+    .output(z.any())
     .query(async ({ input }: { input: any }) => {
       return fieldsService.getPublicFields(input.formId);
     }),
@@ -77,6 +79,7 @@ export const fieldsRouter = router({
       validationRules: z.any().optional(),
       order: z.number().int().min(0),
     }))
+    .output(z.any())
     .mutation(async ({ input, ctx }: { input: any, ctx: any }) => {
       const { formId, ...fieldData } = input;
       return fieldsService.create(formId, ctx.user.id, fieldData);
@@ -109,6 +112,7 @@ export const fieldsRouter = router({
       validationRules: z.any().optional(),
       order: z.number().int().min(0).optional(),
     }))
+    .output(z.any())
     .mutation(async ({ input, ctx }: { input: any, ctx: any }) => {
       const { id, formId, ...data } = input;
       return fieldsService.update(id, formId, ctx.user.id, data);
@@ -132,6 +136,7 @@ export const fieldsRouter = router({
       },
     })
     .input(z.object({ id: z.string(), formId: z.string() }))
+    .output(z.any())
     .mutation(async ({ input, ctx }: { input: any, ctx: any }) => {
       return fieldsService.delete(input.id, input.formId, ctx.user.id);
     }),
@@ -157,6 +162,7 @@ export const fieldsRouter = router({
       formId: z.string(),
       fieldIds: z.array(z.string()),
     }))
+    .output(z.any())
     .mutation(async ({ input, ctx }: { input: any, ctx: any }) => {
       return fieldsService.reorder(input.formId, ctx.user.id, input.fieldIds);
     }),

@@ -23,6 +23,7 @@ export const collaboratorsRouter = router({
       },
     })
     .input(z.object({ formId: z.string() }))
+    .output(z.any())
     .query(async ({ input, ctx }: { input: any, ctx: any }) => {
       return collaboratorsService.list(input.formId, ctx.user.id);
     }),
@@ -49,6 +50,7 @@ export const collaboratorsRouter = router({
       email: z.string().email(),
       role: roleTypeEnum,
     }))
+    .output(z.any())
     .mutation(async ({ input, ctx }: { input: any, ctx: any }) => {
       return collaboratorsService.invite(input.formId, ctx.user.id, input.email, input.role);
     }),
@@ -74,6 +76,7 @@ export const collaboratorsRouter = router({
       formId: z.string(),
       collaboratorId: z.string(),
     }))
+    .output(z.any())
     .mutation(async ({ input, ctx }: { input: any, ctx: any }) => {
       return collaboratorsService.remove(input.formId, ctx.user.id, input.collaboratorId);
     }),

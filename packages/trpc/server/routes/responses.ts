@@ -37,6 +37,7 @@ export const responsesRouter = router({
       password: z.string().optional(),
       timeToComplete: z.number().optional(),
     }))
+    .output(z.any())
     .mutation(async ({ input, ctx }: { input: any, ctx: any }) => {
       const ip = ctx.req?.ip ?? "127.0.0.1";
       return responsesService.submit(
@@ -52,18 +53,18 @@ export const responsesRouter = router({
     .meta({
       openapi: {
         method: "GET",
-        path: "/forms",
-        tags: ["Forms"],
+        path: "/responses",
+        tags: ["Responses"],
         protect: true,
-        summary: "List user's forms",
+        summary: "List form responses",
         description: "// NOTE: keep this RBAC table in sync with apps/api/src/rbac.ts\n\n" +
           "| Role | Can access |\n" +
           "|---|---|\n" +
           "| THE_ARCHITECT | ✓ |\n" +
           "| THE_EXTRACTOR | ✓ |\n" +
-          "| THE_FORGER | ✓ |\n" +
-          "| THE_SHADE | ✓ |\n\n" +
-          "Lists forms the authenticated user owns or collaborates on.",
+          "| THE_FORGER | ✗ |\n" +
+          "| THE_SHADE | ✗ |\n\n" +
+          "Requires Bearer token authentication.",
       },
     })
     .input(
@@ -74,18 +75,40 @@ export const responsesRouter = router({
         completed: z.boolean().optional(),
       }).merge(paginationInput)
     )
+    .output(z.any())
     .query(async ({ input, ctx }: { input: any, ctx: any }) => {
       const { formId, ...opts } = input;
       return responsesService.list(formId, ctx.user.id, opts);
     }),
 
   exportCSV: protectedProcedure
+    .meta({
+      openapi: {
+        method: "GET",
+        path: "/responses/export",
+        tags: ["Responses"],
+        protect: true,
+        summary: "Export form responses as CSV",
+        description: "// NOTE: keep this RBAC table in sync with apps/api/src/rbac.ts\n\n" +
+          "| Role | Can access |\n" +
+          "|---|---|\n" +
+          "| THE_ARCHITECT | ✓ |\n" +
+          "| THE_EXTRACTOR | ✓ |\n" +
+          "| THE_FORGER | ✗ |\n" +
+          "| THE_SHADE | ✗ |\n\n" +
+          "Export is restricted to Architects and Extractors.",
+      },
+    })
     .input(z.object({
       formId: z.string(),
-      filters: responseFilterSchema,
+      startDate: z.string().optional(),
+      endDate: z.string().optional(),
+      completed: z.boolean().optional(),
     }))
+    .output(z.any())
     .query(async ({ input, ctx }) => {
-      return responsesService.exportCSV(input.formId, ctx.user.id, input.filters);
+      const { formId, ...filters } = input;
+      return responsesService.exportCSV(formId, ctx.user.id, filters);
     }),
 });
 

@@ -28,6 +28,7 @@ export const formsRouter = router({
       slug: z.string().min(1).max(100).regex(/^[a-z0-9-]+$/),
       visibility: z.enum(["public", "unlisted"]).default("unlisted"),
     }))
+    .output(z.any())
     .mutation(async ({ input, ctx }: { input: any, ctx: any }) => {
       return formsService.create(ctx.user.id, input.title, input.slug, input.visibility);
     }),
@@ -51,6 +52,7 @@ export const formsRouter = router({
       },
     })
     .input(paginationInput)
+    .output(z.any())
     .query(async ({ input, ctx }: { input: any, ctx: any }) => {
       return formsService.list(ctx.user.id, input);
     }),
@@ -90,6 +92,7 @@ export const formsRouter = router({
       slug: z.string(),
       password: z.string().optional(),
     }))
+    .output(z.any())
     .query(async ({ input }: { input: any }) => {
       return formsService.getPublicForm(input.slug, input.password);
     }),
@@ -133,6 +136,7 @@ export const formsRouter = router({
       thankYouMessage: z.string().nullable().optional(),
       redirectUrl: z.string().url().nullable().optional(),
     }))
+    .output(z.any())
     .mutation(async ({ input, ctx }: { input: any, ctx: any }) => {
       const { id, ...data } = input;
       return formsService.update(id, data, ctx.user.id);
@@ -156,6 +160,7 @@ export const formsRouter = router({
       },
     })
     .input(z.object({ id: z.string() }))
+    .output(z.any())
     .mutation(async ({ input, ctx }: { input: any, ctx: any }) => {
       return formsService.delete(input.id, ctx.user.id);
     }),

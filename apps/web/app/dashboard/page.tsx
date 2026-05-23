@@ -154,7 +154,7 @@ const handleLogout = async () => {
       <main className="flex-1 max-w-7xl w-full mx-auto p-6 md:p-8 space-y-8 z-10">
 
         {/* Observer Mode Banner — appears when user is THE_SHADE on at least one form */}
-        {!isFormsLoading && formsData?.items?.some((f) => f.role === "THE_SHADE") && (
+        {!isFormsLoading && formsData?.items?.some((f: any) => f.role === "THE_SHADE") && (
           <div className="flex items-start space-x-3 bg-amber-950/20 border border-amber-900/40 rounded p-4 text-amber-500 animate-in fade-in duration-500">
             <EyeOff size={16} className="mt-0.5 shrink-0 animate-pulse" />
             <div>
@@ -204,7 +204,7 @@ const handleLogout = async () => {
           </div>
         ) : formsData?.items && formsData.items.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {formsData.items.map((item) => {
+            {formsData.items.map((item: any) => {
               const isOwner = item.role === "THE_ARCHITECT";
               const isForger = item.role === "THE_FORGER";
               const isShade = item.role === "THE_SHADE";

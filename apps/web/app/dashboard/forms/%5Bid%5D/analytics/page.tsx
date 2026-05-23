@@ -75,22 +75,22 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
     data: summary,
     isLoading: isSummaryLoading,
     error: summaryError,
-  } = trpc.analytics.getSummary.useQuery({ formId: id, filters });
+  } = trpc.analytics.getSummary.useQuery({ formId: id, ...filters });
 
   const {
     data: dropoffs,
     isLoading: isDropoffsLoading,
-  } = trpc.analytics.getFieldDropoffs.useQuery({ formId: id, filters });
+  } = trpc.analytics.getFieldDropoffs.useQuery({ formId: id, ...filters });
 
   const {
     data: dailyStats,
     isLoading: isDailyStatsLoading,
-  } = trpc.analytics.getDailyStats.useQuery({ formId: id, filters });
+  } = trpc.analytics.getDailyStats.useQuery({ formId: id, ...filters });
 
   const {
     data: distributions,
     isLoading: isDistributionsLoading,
-  } = trpc.analytics.getFieldDistributions.useQuery({ formId: id, filters });
+  } = trpc.analytics.getFieldDistributions.useQuery({ formId: id, ...filters });
 
   const {
     data: responsesData,
@@ -114,7 +114,7 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
   const userRoleOnForm = form
     ? form.userId === user?.id
       ? "THE_ARCHITECT"
-      : (collaborators?.find((c) => c.userId === user?.id)?.role ?? "THE_SHADE")
+      : (collaborators?.find((c: any) => c.userId === user?.id)?.role ?? "THE_SHADE")
     : "THE_SHADE";
 
   const isShade = userRoleOnForm === "THE_SHADE" || summaryError?.message.includes("Access Revoked");
@@ -126,7 +126,7 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
     try {
       const csvContent = await utils.client.responses.exportCSV.query({
         formId: id,
-        filters,
+        ...filters,
       });
 
       const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
@@ -427,7 +427,7 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
 
                 <div className="flex-1 overflow-y-auto space-y-3.5 pr-1 max-h-64">
                   {dropoffs && dropoffs.length > 0 ? (
-                    dropoffs.map((field, idx) => {
+                    dropoffs.map((field: any, idx: any) => {
                       const percentage = field.total > 0 ? Math.round((field.filled / field.total) * 100) : 0;
                       return (
                         <div key={field.fieldId} className="space-y-1.5 text-xs">
@@ -466,12 +466,12 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
 
               {distributions && Object.keys(distributions).length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {Object.entries(distributions).map(([fieldId, dist]) => {
-                    const fieldDef = fields?.find((f) => f.id === fieldId);
+                  {Object.entries(distributions).map(([fieldId, dist]: [string, any]) => {
+                    const fieldDef = fields?.find((f: any) => f.id === fieldId);
                     if (!fieldDef) return null;
 
                     // Calculate total counts for percentage
-                    const totalResponses = dist.reduce((acc, curr) => acc + curr.count, 0);
+                    const totalResponses = dist.reduce((acc: any, curr: any) => acc + curr.count, 0);
 
                     return (
                       <div key={fieldId} className="border border-stone-850 bg-stone-950/20 p-4 rounded space-y-4">
@@ -481,7 +481,7 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
                         </div>
 
                         <div className="space-y-2.5">
-                          {dist.map((option) => {
+                          {dist.map((option: any) => {
                             const percent = totalResponses > 0 ? Math.round((option.count / totalResponses) * 100) : 0;
                             return (
                               <div key={option.value} className="space-y-1">
@@ -535,7 +535,7 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
                         </tr>
                       </thead>
                       <tbody>
-                        {responsesData.items.map((resp) => {
+                        {responsesData.items.map((resp: any) => {
                           const isExpanded = expandedResponseId === resp.id;
                           return (
                             <React.Fragment key={resp.id}>
@@ -581,7 +581,7 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
 
                                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         {fields && fields.length > 0 ? (
-                                          fields.map((field) => {
+                                          fields.map((field: any) => {
                                             const val = (resp.responseValues as Record<string, any>)[field.id];
                                             let renderedVal = "";
                                             if (val === undefined || val === null || val === "") {
