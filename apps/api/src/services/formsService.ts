@@ -48,13 +48,27 @@ export async function getUserFormRole(formId: string, userId: string) {
 export class FormsService {
   async create(userId: string, title: string, slug: string, visibility: "public" | "unlisted") {
     const [user] = await db
-      .select({ role: usersTable.role })
+      .select({ role: usersTable.role, subscriptionTier: usersTable.subscriptionTier })
       .from(usersTable)
       .where(eq(usersTable.id, userId))
       .limit(1);
 
     if (!user || !can(user.role, "createForm")) {
       throw new TRPCError({ code: "FORBIDDEN", message: "Insufficient permissions to create form" });
+    }
+
+    if (user.subscriptionTier === "free") {
+      const userForms = await db
+        .select({ id: formsTable.id })
+        .from(formsTable)
+        .where(eq(formsTable.userId, userId));
+      
+      if (userForms.length >= 3) {
+        throw new TRPCError({ 
+          code: "FORBIDDEN", 
+          message: "Limbo tier is restricted to 3 dreamscapes. Upgrade to Architect to project more." 
+        });
+      }
     }
 
     const [form] = await db

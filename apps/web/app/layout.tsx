@@ -31,7 +31,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
-      <body className={`${geistSans.variable} ${geistMono.variable} ${cormorant.variable} antialiased`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} ${cormorant.variable} antialiased font-mono bg-background text-foreground`}>
         <GlobalProviders>{children}</GlobalProviders>
       </body>
     </html>

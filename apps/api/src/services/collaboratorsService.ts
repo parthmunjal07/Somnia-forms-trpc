@@ -44,6 +44,20 @@ export class CollaboratorsService {
       throw new TRPCError({ code: "FORBIDDEN", message: "Only the Architect can invite collaborators" });
     }
 
+    const [owner] = await db
+      .select({ subscriptionTier: usersTable.subscriptionTier })
+      .from(usersTable)
+      .where(eq(usersTable.id, currentUserId))
+      .limit(1);
+    
+    if (owner?.subscriptionTier === "free") {
+      throw new TRPCError({ code: "FORBIDDEN", message: "Limbo tier cannot invite collaborators. Please upgrade to Architect or Syndicate." });
+    }
+
+    if (owner?.subscriptionTier === "pro" && role !== "THE_FORGER") {
+      throw new TRPCError({ code: "FORBIDDEN", message: "Architect tier can only invite Forgers. Upgrade to Syndicate to invite Shades." });
+    }
+
     // 2. Look up the user being invited by email
     const [targetUser] = await db
       .select()

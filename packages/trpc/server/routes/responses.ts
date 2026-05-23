@@ -3,6 +3,12 @@ import { router, publicProcedure, protectedProcedure } from "../../../../apps/ap
 import { responsesService } from "../../../../apps/api/src/services/responsesService";
 import { paginationInput } from "../../pagination";
 
+const responseFilterSchema = z.object({
+  startDate: z.string().optional(),
+  endDate: z.string().optional(),
+  completed: z.boolean().optional(),
+}).optional();
+
 export const responsesRouter = router({
   submit: publicProcedure
     .input(z.object({
@@ -39,13 +45,10 @@ export const responsesRouter = router({
   exportCSV: protectedProcedure
     .input(z.object({
       formId: z.string(),
-      filters: z.object({
-        startDate: z.string().optional(),
-        endDate: z.string().optional(),
-        completed: z.boolean().optional(),
-      }).optional(),
+      filters: responseFilterSchema,
     }))
     .query(async ({ input, ctx }) => {
       return responsesService.exportCSV(input.formId, ctx.user.id, input.filters);
     }),
 });
+

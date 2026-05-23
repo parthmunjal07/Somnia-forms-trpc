@@ -25,18 +25,21 @@ export const GlobalProviders: React.FC<{ children: React.ReactNode }> = ({ child
   );
   return (
     <QueryClientProvider client={queryClient}>
-      <NextThemesProvider
-        attribute="class"
-        defaultTheme="dark"
-        enableSystem={false}
-        forcedTheme="dark"
-        disableTransitionOnChange
-      >
+      {/* next-themes v0.4+ requires children to be passed as a prop */}
+      {React.createElement(
+        NextThemesProvider,
+        {
+          attribute: "class",
+          defaultTheme: "dark",
+          enableSystem: false,
+          forcedTheme: "dark",
+          disableTransitionOnChange: true,
+        },
         <trpc.Provider queryClient={queryClient} client={trpcClient}>
           {children}
           <Toaster />
         </trpc.Provider>
-      </NextThemesProvider>
+      )}
     </QueryClientProvider>
   );
 };
