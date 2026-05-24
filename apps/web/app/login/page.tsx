@@ -175,7 +175,7 @@ export default function LoginPage() {
 
       <Link href="/" className="absolute top-8 left-8 z-50 flex items-center gap-3 hover:opacity-80 transition-opacity">
         <Totem size={18} className="text-[#C9933A]" />
-        <span className="font-cormorant text-xl text-[#C9933A] tracking-[0.15em]">SOMNIA</span>
+        <span className="font-cormorant text-2xl text-[#C9933A] tracking-[0.15em]">SOMNIA</span>
       </Link>
 
       {/* Main glassmorphic container */}
@@ -194,13 +194,13 @@ export default function LoginPage() {
           <h1 className="text-4xl tracking-[0.15em] text-[#EEF3F8] font-cormorant select-none font-medium mb-1">
             {activeTab === "login" ? "Enter the Dream" : "Initialize Identity"}
           </h1>
-          <p className="text-[11px] uppercase text-[#8BA3BF]/60 tracking-[0.25em]">
+          <p className="text-[14px] uppercase text-[#8BA3BF]/60 tracking-[0.25em]">
             The Workshop / Architect Setup
           </p>
         </div>
 
         {/* Auth Mode Toggle */}
-        <div className="flex mb-8 relative text-[11px] uppercase tracking-[0.2em]">
+        <div className="flex mb-8 relative text-[15px] uppercase tracking-[0.2em]">
           <button
             type="button"
             onClick={() => setActiveTab("login")}
@@ -235,7 +235,7 @@ export default function LoginPage() {
         <form onSubmit={handleSubmit} className="space-y-6">
           {activeTab === "register" && (
             <div className="space-y-2">
-              <label htmlFor="fullName" className="text-[10px] text-[#8BA3BF] tracking-[0.2em] block uppercase">
+              <label htmlFor="fullName" className="text-[14px] text-[#8BA3BF] tracking-[0.2em] block uppercase">
                 Full Name / Alias
               </label>
               <input
@@ -246,7 +246,7 @@ export default function LoginPage() {
                 placeholder="e.g. Cobb"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className="w-full text-[#EEF3F8] placeholder-[#8BA3BF]/30 text-[13px] tracking-wide focus:outline-none transition-all px-4 py-3 rounded-sm"
+                className="w-full text-[#EEF3F8] placeholder-[#8BA3BF]/30 text-[15px] tracking-wide focus:outline-none transition-all px-4 py-3 rounded-sm"
                 style={{
                   background: "rgba(255,255,255,0.025)",
                   border: "0.5px solid rgba(200,216,232,0.1)",
@@ -256,7 +256,7 @@ export default function LoginPage() {
           )}
 
           <div className="space-y-2">
-            <label htmlFor="email" className="text-[10px] text-[#8BA3BF] tracking-[0.2em] block uppercase">
+            <label htmlFor="email" className="text-[14px] text-[#8BA3BF] tracking-[0.2em] block uppercase">
               Dreamer Identity (Email)
             </label>
             <input
@@ -267,7 +267,7 @@ export default function LoginPage() {
               placeholder="alias@somnia.app"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full text-[#EEF3F8] placeholder-[#8BA3BF]/30 text-[13px] tracking-wide focus:outline-none transition-all px-4 py-3 rounded-sm"
+              className="w-full text-[#EEF3F8] placeholder-[#8BA3BF]/30 text-[15px] tracking-wide focus:outline-none transition-all px-4 py-3 rounded-sm"
               style={{
                 background: "rgba(255,255,255,0.025)",
                 border: "0.5px solid rgba(200,216,232,0.1)",
@@ -276,7 +276,7 @@ export default function LoginPage() {
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="password" className="text-[10px] text-[#8BA3BF] tracking-[0.2em] block uppercase">
+            <label htmlFor="password" className="text-[14px] text-[#8BA3BF] tracking-[0.2em] block uppercase">
               Passphrase (Password)
             </label>
             <input
@@ -287,14 +287,14 @@ export default function LoginPage() {
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full text-[#EEF3F8] placeholder-[#8BA3BF]/30 text-[13px] tracking-wide focus:outline-none transition-all px-4 py-3 rounded-sm"
+              className="w-full text-[#EEF3F8] placeholder-[#8BA3BF]/30 text-[15px] tracking-wide focus:outline-none transition-all px-4 py-3 rounded-sm"
               style={{
                 background: "rgba(255,255,255,0.025)",
                 border: "0.5px solid rgba(200,216,232,0.1)",
               }}
             />
             {activeTab === "register" && (
-              <p className="text-[9px] text-[#8BA3BF]/50 mt-2 leading-relaxed tracking-wider uppercase">
+              <p className="text-[12px] text-[#8BA3BF]/50 mt-2 leading-relaxed tracking-wider uppercase">
                 Must contain at least 8 characters, an uppercase letter, and a number.
               </p>
             )}
@@ -303,7 +303,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-4 bg-[#C9933A] text-[#0A0A0F] text-[12px] font-bold tracking-[0.2em] uppercase rounded-sm hover:bg-[#E8B455] transition-all hover:shadow-[0_0_30px_rgba(201,147,58,0.25)] hover:-translate-y-px active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed mt-4"
+            className="w-full py-4 bg-[#C9933A] text-[#0A0A0F] text-[15px] font-bold tracking-[0.2em] uppercase rounded-sm hover:bg-[#E8B455] transition-all hover:shadow-[0_0_30px_rgba(201,147,58,0.25)] hover:-translate-y-px active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed mt-4"
           >
             {isLoading
               ? "Connecting..."
@@ -313,7 +313,7 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <div className="flex items-center gap-3 w-full text-[#8BA3BF]/40 text-[10px] tracking-[0.2em] my-6 uppercase">
+        <div className="flex items-center gap-3 w-full text-[#8BA3BF]/40 text-[12px] tracking-[0.2em] my-6 uppercase">
           <div className="flex-1 h-[0.5px] bg-[rgba(200,216,232,0.1)]"></div>
           <span>Or</span>
           <div className="flex-1 h-[0.5px] bg-[rgba(200,216,232,0.1)]"></div>
@@ -323,7 +323,7 @@ export default function LoginPage() {
           type="button"
           onClick={handleGoogleLogin}
           disabled={isLoading}
-          className="w-full py-3 text-[11px] tracking-[0.2em] uppercase rounded-sm transition-all text-[#8BA3BF] hover:text-[#EEF3F8] flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full py-3 text-[15px] tracking-[0.2em] uppercase rounded-sm transition-all text-[#8BA3BF] hover:text-[#EEF3F8] flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
           style={{ border: "0.5px solid rgba(139,163,191,0.2)" }}
         >
           <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current">
@@ -336,7 +336,7 @@ export default function LoginPage() {
         </button>
 
         {/* Bottom micro-info */}
-        <div className="mt-8 pt-4 flex items-center justify-between text-[9px] tracking-[0.2em] text-[#8BA3BF]/40 uppercase" style={{ borderTop: "0.5px solid rgba(200,216,232,0.1)" }}>
+        <div className="mt-8 pt-4 flex items-center justify-between text-[12px] tracking-[0.2em] text-[#8BA3BF]/40 uppercase" style={{ borderTop: "0.5px solid rgba(200,216,232,0.1)" }}>
           <span>Layer 0 / Reality</span>
           <div className="flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-[#4AFF9E] animate-pulse" />
