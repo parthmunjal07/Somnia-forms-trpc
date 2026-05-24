@@ -3,7 +3,7 @@ import { env } from "./env";
 import express from "express";
 import { logger } from "@repo/logger";
 import cors from "cors";
-import helmet from "helmet";
+import helmet, { contentSecurityPolicy } from "helmet";
 import cookieParser from "cookie-parser";
 import { rateLimit } from "express-rate-limit";
 import { randomBytes } from "node:crypto";
@@ -27,7 +27,28 @@ function adaptContext(opts: CreateExpressContextOptions) {
 export const app = express();
 
 // ─── Security Headers ─────────────────────────────────────────────────────────
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        // Keeps your strict default fallback
+        defaultSrc: ["'none'"], 
+        
+        // ALLOWS your network requests, API calls, and CSRF validations
+        connectSrc: [
+          "'self'",
+          "http://localhost:8000"       // Your local development API URL
+        ],
+        
+        // Recommended basics to keep the app working safely
+        scriptSrc: ["'self'"],
+        styleSrc: ["'self'"],
+        imgSrc: ["'self'", "data:"],
+      },
+    },
+  })
+);
+
 
 // ─── CORS ─────────────────────────────────────────────────────────────────────
 const allowedOrigins = env.ALLOWED_ORIGINS.split(",").map((o) => o.trim());

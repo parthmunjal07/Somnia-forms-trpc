@@ -1,5 +1,5 @@
 {
-  "id": "d74a1054-38fe-4a8d-a945-615ca1eb9d79",
+  "id": "c5058513-696b-4f0d-8cee-d23d4c4c6585",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -123,7 +123,7 @@
         },
         "google_id": {
           "name": "google_id",
-          "type": "varchar(255)",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },

@@ -1,4 +1,5 @@
 import { httpLink, httpBatchStreamLink } from "@repo/trpc/client";
+import superjson from "superjson";
 import { env } from "~/env.js";
 
 interface CreateTRPCHttpBatchClientClientOpts {
@@ -32,6 +33,7 @@ export const createTRPCHttpBatchClientClient = (opts?: CreateTRPCHttpBatchClient
   const url = `${getBaseUrl()}/trpc`;
   return c({
     url,
+    transformer: superjson,
     async fetch(url, options) {
       // Attach the CSRF token so the double-submit cookie check passes on every mutation.
       const csrf = await ensureCsrfToken();

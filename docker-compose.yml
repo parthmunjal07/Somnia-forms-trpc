@@ -5,9 +5,9 @@ services:
     container_name: postgresdb
 
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: dev
+      POSTGRES_USER: somnia
+      POSTGRES_PASSWORD: somnia
+      POSTGRES_DB: form
 
     ports:
       - "5434:5432"

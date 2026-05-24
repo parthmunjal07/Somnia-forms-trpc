@@ -19,7 +19,7 @@ CREATE TABLE "users" (
 	"email" varchar(255) NOT NULL,
 	"email_verified_at" timestamp,
 	"password_hash" varchar(255),
-	"google_id" varchar(255),
+	"google_id" text,
 	"role" "role_type" DEFAULT 'THE_ARCHITECT' NOT NULL,
 	"subscription_tier" "subscription_tier" DEFAULT 'free' NOT NULL,
 	"profile_image_url" text,
