@@ -20,19 +20,6 @@ export const SomniaEmailLayout: React.FC<SomniaEmailLayoutProps> = ({
 }) => {
   return (
     <Html>
-      <Head>
-        <Font
-          fontFamily="JetBrains Mono"
-          fallbackFontFamily="monospace"
-          webFont={{
-            url: "https://fonts.gstatic.com/s/jetbrainsmono/v18/tDbY2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKwI.woff2",
-            format: "woff2",
-          }}
-          fontWeight={400}
-          fontStyle="normal"
-        />
-      </Head>
-      <Preview>{previewText}</Preview>
       <Tailwind
         config={{
           theme: {
@@ -51,6 +38,19 @@ export const SomniaEmailLayout: React.FC<SomniaEmailLayoutProps> = ({
           },
         }}
       >
+        <Head>
+          <Font
+            fontFamily="JetBrains Mono"
+            fallbackFontFamily="monospace"
+            webFont={{
+              url: "https://fonts.gstatic.com/s/jetbrainsmono/v18/tDbY2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKwI.woff2",
+              format: "woff2",
+            }}
+            fontWeight={400}
+            fontStyle="normal"
+          />
+        </Head>
+        <Preview>{previewText}</Preview>
         <Body className="bg-limbo text-primary font-mono m-0 py-8 px-4">
           <Container className="bg-[rgba(255,255,255,0.02)] border border-[rgba(200,216,232,0.1)] rounded p-8 shadow-lg max-w-[600px] mx-auto text-left">
             <div className="mb-8 flex items-center gap-2">

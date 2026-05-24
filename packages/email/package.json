@@ -5,9 +5,10 @@
   "main": "./index.ts",
   "types": "./index.ts",
   "scripts": {
-    "dev": "email dev"
+    "dev": "email dev --dir src/templates"
   },
   "devDependencies": {
+    "@react-email/ui": "6.3.2",
     "@repo/config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@types/node": "^22.15.3",
@@ -18,7 +19,7 @@
   "dependencies": {
     "@react-email/components": "^1.0.12",
     "react": "^19.2.6",
-    "react-dom": "^19.2.0",
+    "react-dom": "^19.2.6",
     "react-email": "^6.3.2",
     "resend": "^6.12.3"
   }
