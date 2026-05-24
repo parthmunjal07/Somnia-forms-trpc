@@ -35,6 +35,7 @@ export const updateFormSchema = z.object({
     .optional(),
   status: z.enum(["draft", "published", "archived"]).optional(),
   visibility: z.enum(["public", "unlisted"]).optional(),
+  theme: z.enum(["inception", "dark_knight", "interstellar", "tenet"]).optional(),
   redirectUrl: z.string().url("Invalid redirect URL").nullable().optional(),
 });
 

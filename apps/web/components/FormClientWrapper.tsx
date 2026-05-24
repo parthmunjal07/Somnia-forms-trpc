@@ -6,7 +6,6 @@ import { PasswordGate } from "./PasswordGate";
 import { FormRunner } from "./FormRunner";
 import { Totem } from "./Totem";
 import { AlertCircle, EyeOff, ShieldAlert } from "lucide-react";
-import { getSkinStyles } from "~/lib/themes";
 import { FieldDefinition } from "./FieldRenderer";
 
 interface FormClientWrapperProps {
@@ -55,8 +54,7 @@ export function FormClientWrapper({ slug, initialData }: FormClientWrapperProps)
 
   // Determine which data to use (server initial data or client-loaded unlocked data)
   const currentData = clientData || initialData;
-  const skin = currentData.form?.theme ?? "classic-dark";
-  const styles = getSkinStyles(skin);
+  const skin = currentData.form?.theme ?? "inception";
 
   const incrementViews = trpc.analytics.incrementViews.useMutation();
 
@@ -89,7 +87,7 @@ export function FormClientWrapper({ slug, initialData }: FormClientWrapperProps)
   // 2. Client query is loading (after password verification)
   if (clientLoading) {
     return (
-      <div className={`min-h-screen ${styles.bg} flex flex-col items-center justify-center font-mono select-none`}>
+      <div className={`skin-${skin} ${"min-h-screen bg-[var(--theme-bg)] text-[var(--theme-text)] flex flex-col items-center justify-center font-mono select-none"}`} style={{ background: "var(--theme-bg)" }}>
         <div className="absolute inset-0 bg-[linear-gradient(to_right,currentColor_1px,transparent_1px),linear-gradient(to_bottom,currentColor_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-3 pointer-events-none" />
         <div className="relative flex flex-col items-center justify-center space-y-6">
           <div className="w-16 h-16 flex items-center justify-center">
@@ -106,8 +104,8 @@ export function FormClientWrapper({ slug, initialData }: FormClientWrapperProps)
   // 3. Client query error (passcode was incorrect or revoked)
   if (clientError || currentData.passwordRequired && passcode && clientData?.passwordRequired) {
     return (
-      <div className={`min-h-screen ${styles.bg} flex flex-col items-center justify-center p-4 font-mono select-none`}>
-        <div className={`max-w-md w-full border p-8 rounded-lg ${styles.cardBg} ${styles.glow} text-center space-y-6 animate-in fade-in duration-500`}>
+      <div className={`skin-${skin} ${"min-h-screen bg-[var(--theme-bg)] text-[var(--theme-text)] flex flex-col items-center justify-center p-4 font-mono select-none"}`} style={{ background: "var(--theme-bg)" }}>
+        <div className={`max-w-md w-full border p-8 rounded-lg bg-[var(--theme-surface)] border-[var(--theme-border)] shadow-[0_0_15px_var(--theme-border)]  text-center space-y-6 animate-in fade-in duration-500`}>
           <div className="mx-auto w-12 h-12 rounded border border-red-950 bg-red-950/10 flex items-center justify-center text-red-500">
             <ShieldAlert size={20} className="animate-pulse" />
           </div>
@@ -126,7 +124,7 @@ export function FormClientWrapper({ slug, initialData }: FormClientWrapperProps)
               }
               setPasscode(undefined);
             }}
-            className={`w-full py-2.5 text-xs font-semibold uppercase tracking-widest border transition-all cursor-pointer ${styles.btn}`}
+            className={`w-full py-2.5 text-xs font-semibold uppercase tracking-widest border transition-all cursor-pointer bg-[var(--theme-accent)] text-[var(--theme-bg)] border-[var(--theme-accent)] hover:opacity-90`}
           >
             Clear and retry
           </button>
@@ -140,10 +138,10 @@ export function FormClientWrapper({ slug, initialData }: FormClientWrapperProps)
   // A. Unpublished state
   if (currentData.unpublished) {
     return (
-      <div className={`min-h-screen ${styles.bg} flex flex-col items-center justify-center p-4 font-mono select-none`}>
+      <div className={`skin-${skin} ${"min-h-screen bg-[var(--theme-bg)] text-[var(--theme-text)] flex flex-col items-center justify-center p-4 font-mono select-none"}`} style={{ background: "var(--theme-bg)" }}>
         <div className="absolute inset-0 bg-[linear-gradient(to_right,currentColor_1px,transparent_1px),linear-gradient(to_bottom,currentColor_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-3 pointer-events-none" />
-        <div className={`max-w-md w-full border p-8 rounded-lg text-center ${styles.cardBg} ${styles.glow} space-y-6 animate-in fade-in duration-500`}>
-          <div className={`mx-auto w-12 h-12 rounded border border-current/20 bg-current/5 flex items-center justify-center ${styles.accent}`}>
+        <div className={`max-w-md w-full border p-8 rounded-lg text-center bg-[var(--theme-surface)] border-[var(--theme-border)] shadow-[0_0_15px_var(--theme-border)]  space-y-6 animate-in fade-in duration-500`}>
+          <div className={`mx-auto w-12 h-12 rounded border border-current/20 bg-current/5 flex items-center justify-center text-[var(--theme-accent)]`}>
             <EyeOff size={20} className="animate-pulse" />
           </div>
           <div className="space-y-2">
@@ -162,9 +160,9 @@ export function FormClientWrapper({ slug, initialData }: FormClientWrapperProps)
   // B. Expired state
   if (currentData.expired) {
     return (
-      <div className={`min-h-screen ${styles.bg} flex flex-col items-center justify-center p-4 font-mono select-none`}>
+      <div className={`skin-${skin} ${"min-h-screen bg-[var(--theme-bg)] text-[var(--theme-text)] flex flex-col items-center justify-center p-4 font-mono select-none"}`} style={{ background: "var(--theme-bg)" }}>
         <div className="absolute inset-0 bg-[linear-gradient(to_right,currentColor_1px,transparent_1px),linear-gradient(to_bottom,currentColor_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-3 pointer-events-none" />
-        <div className={`max-w-md w-full border p-8 rounded-lg text-center ${styles.cardBg} ${styles.glow} space-y-6 animate-in fade-in duration-500`}>
+        <div className={`max-w-md w-full border p-8 rounded-lg text-center bg-[var(--theme-surface)] border-[var(--theme-border)] shadow-[0_0_15px_var(--theme-border)]  space-y-6 animate-in fade-in duration-500`}>
           <div className="flex justify-center">
             <Totem status="stopped" />
           </div>
@@ -184,9 +182,9 @@ export function FormClientWrapper({ slug, initialData }: FormClientWrapperProps)
   // C. Cap/Limit Reached state
   if (currentData.capReached) {
     return (
-      <div className={`min-h-screen ${styles.bg} flex flex-col items-center justify-center p-4 font-mono select-none`}>
+      <div className={`skin-${skin} ${"min-h-screen bg-[var(--theme-bg)] text-[var(--theme-text)] flex flex-col items-center justify-center p-4 font-mono select-none"}`} style={{ background: "var(--theme-bg)" }}>
         <div className="absolute inset-0 bg-[linear-gradient(to_right,currentColor_1px,transparent_1px),linear-gradient(to_bottom,currentColor_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-3 pointer-events-none" />
-        <div className={`max-w-md w-full border p-8 rounded-lg text-center ${styles.cardBg} ${styles.glow} space-y-6 animate-in fade-in duration-500`}>
+        <div className={`max-w-md w-full border p-8 rounded-lg text-center bg-[var(--theme-surface)] border-[var(--theme-border)] shadow-[0_0_15px_var(--theme-border)]  space-y-6 animate-in fade-in duration-500`}>
           <div className="flex justify-center">
             <Totem status="stopped" />
           </div>
@@ -209,7 +207,6 @@ export function FormClientWrapper({ slug, initialData }: FormClientWrapperProps)
       <PasswordGate
         slug={slug}
         title={currentData.form?.title || "Protected Layer"}
-        styles={styles}
         onUnlock={(pwd) => setPasscode(pwd)}
       />
     );
@@ -222,8 +219,7 @@ export function FormClientWrapper({ slug, initialData }: FormClientWrapperProps)
         form={currentData.form}
         fields={currentData.fields}
         passcode={passcode}
-        styles={styles}
-      />
+        />
     );
   }
 

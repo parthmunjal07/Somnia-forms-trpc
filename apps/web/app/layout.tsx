@@ -24,6 +24,9 @@ export const metadata: Metadata = {
   description: "Monospace-enforced, Inception-themed forms builder and submission engine",
 };
 
+import NextTopLoader from "nextjs-toploader";
+import { PageTransition } from "~/components/PageTransition";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -35,7 +38,10 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} ${cormorant.variable} antialiased font-mono bg-background text-foreground`}>
-        <GlobalProviders>{children}</GlobalProviders>
+        <NextTopLoader color="#C9933A" height={1} showSpinner={false} shadow={false} />
+        <GlobalProviders>
+          <PageTransition>{children}</PageTransition>
+        </GlobalProviders>
       </body>
     </html>
   );

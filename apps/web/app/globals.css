@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "../styles/themes.css";
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
@@ -63,6 +64,36 @@
   --spacing-gutter: 16px;
   --spacing-unit: 4px;
   --spacing-container-max: 1200px;
+}
+
+@keyframes totem-decelerate {
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(1080deg); } /* Spin fast for ~0.4s */
+  100% { transform: rotate(1455deg); } /* Slow to stop at 15deg over 1.2s */
+}
+
+.animate-totem-decelerate {
+  animation: totem-decelerate 1.7s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(200, 216, 232, 0.04) 25%,
+    rgba(200, 216, 232, 0.08) 50%,
+    rgba(200, 216, 232, 0.04) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 2s infinite linear;
 }
 
 @keyframes fog-drift {

@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { trpc } from "~/trpc/client";
 import { toast } from "sonner";
 import { ArrowLeft, ArrowRight, CornerDownLeft, RefreshCw, LogOut } from "lucide-react";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Totem } from "./Totem";
 import { ProgressBar } from "./ProgressBar";
 import { FieldRenderer, FieldDefinition } from "./FieldRenderer";
@@ -18,20 +19,39 @@ interface FormRunnerProps {
   };
   fields: FieldDefinition[];
   passcode?: string;
-  styles: {
-    bg: string;
-    cardBg: string;
-    input: string;
-    btn: string;
-    accent: string;
-    glow: string;
-  };
 }
 
-export function FormRunner({ form, fields, passcode, styles }: FormRunnerProps) {
+export function FormRunner({ form, fields, passcode} : FormRunnerProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [direction, setDirection] = useState(1);
+  const shouldReduceMotion = useReducedMotion();
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const variants = {
+    initial: (d: number) => ({
+      y: d > 0 ? -20 : 20,
+      opacity: 0,
+      scale: 0.97
+    }),
+    animate: {
+      y: 0,
+      opacity: 1,
+      scale: 1
+    },
+    exit: (d: number) => ({
+      y: d > 0 ? 20 : -20,
+      opacity: 0,
+      scale: 0.97
+    })
+  };
+
+  const reducedVariants = {
+    initial: { opacity: 0 },
+    animate: { opacity: 1 },
+    exit: { opacity: 0 }
+  };
+
   
   // Submission & Animation states
   const [submitStatus, setSubmitStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
@@ -155,7 +175,9 @@ export function FormRunner({ form, fields, passcode, styles }: FormRunnerProps) 
       return updated;
     });
 
+    const isInverted = form.theme === 'tenet' && process.env.NEXT_PUBLIC_REFRESH_SECRET;
     if (currentIndex < fields.length - 1) {
+      setDirection(isInverted ? -1 : 1);
       setCurrentIndex((prev) => prev + 1);
     } else {
       // Last question - initiate submission
@@ -164,7 +186,9 @@ export function FormRunner({ form, fields, passcode, styles }: FormRunnerProps) 
   };
 
   const handleBack = () => {
+    const isInverted = form.theme === 'tenet' && process.env.NEXT_PUBLIC_REFRESH_SECRET;
     if (currentIndex > 0) {
+      setDirection(isInverted ? 1 : -1);
       setCurrentIndex((prev) => prev - 1);
     }
   };
@@ -268,10 +292,15 @@ export function FormRunner({ form, fields, passcode, styles }: FormRunnerProps) 
   // Render Thank You Page
   if (submitStatus === "success" && totemStatus === "stopped" && !showFlash) {
     return (
-      <div className={`min-h-screen ${styles.bg} flex flex-col items-center justify-center p-6 md:p-8 font-mono relative`}>
+    <div className={`skin-${form.theme} min-h-screen bg-[var(--theme-bg)] text-[var(--theme-text)] flex flex-col items-center justify-center p-6 md:p-8 font-mono relative`}>
         <div className="absolute inset-0 bg-[linear-gradient(to_right,currentColor_1px,transparent_1px),linear-gradient(to_bottom,currentColor_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-3 pointer-events-none" />
 
-        <div className={`w-full max-w-lg border p-8 rounded-lg text-center ${styles.cardBg} ${styles.glow} space-y-8 animate-in fade-in duration-500`}>
+        <motion.div
+          initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 8 }}
+          animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.4, ease: "easeOut" }}
+          className={`w-full max-w-lg border p-8 rounded-lg text-center bg-[var(--theme-surface)] border-[var(--theme-border)] shadow-[0_0_15px_var(--theme-border)]  space-y-8`}
+        >
           {/* Static resting Totem */}
           <div className="flex justify-center">
             <Totem status="stopped" />
@@ -287,7 +316,25 @@ export function FormRunner({ form, fields, passcode, styles }: FormRunnerProps) 
           </div>
 
           <div className="border-t border-b border-dashed border-current/15 py-6 px-4 text-xs leading-relaxed opacity-75 whitespace-pre-wrap">
-            {form.thankYouMessage || "THE PROJECTED DATA STABILIZED SUCCESSFULLY. YOU HAVE COMPLETED THIS SUB-LEVEL. YOU MAY SAFELY WAKE UP."}
+            {form.theme === 'tenet' && process.env.NEXT_PUBLIC_REFRESH_SECRET ? (
+              <div className="flex flex-wrap justify-center gap-1 rtl flex-row-reverse">
+                {(form.thankYouMessage || "THE PROJECTED DATA STABILIZED SUCCESSFULLY. YOU HAVE COMPLETED THIS SUB-LEVEL. YOU MAY SAFELY WAKE UP.")
+                  .split(' ')
+                  .map((word, i) => (
+                    <motion.span
+                      key={i}
+                      initial={{ opacity: 0, y: 5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: i * 0.1, duration: 0.3 }}
+                      className="inline-block"
+                    >
+                      {word}
+                    </motion.span>
+                  ))}
+              </div>
+            ) : (
+              form.thankYouMessage || "THE PROJECTED DATA STABILIZED SUCCESSFULLY. YOU HAVE COMPLETED THIS SUB-LEVEL. YOU MAY SAFELY WAKE UP."
+            )}
           </div>
 
           {/* Redirect Countdown UI */}
@@ -299,32 +346,64 @@ export function FormRunner({ form, fields, passcode, styles }: FormRunnerProps) 
               
               <button
                 onClick={handleImmediateRedirect}
-                className={`px-6 py-2.5 rounded text-[10px] font-bold uppercase tracking-widest border transition-all cursor-pointer inline-flex items-center space-x-2 ${styles.btn}`}
+                className={`px-6 py-2.5 rounded text-[10px] font-bold uppercase tracking-widest border transition-all cursor-pointer inline-flex items-center space-x-2 bg-[var(--theme-accent)] text-[var(--theme-bg)] border-[var(--theme-accent)] hover:opacity-90`}
               >
                 <span>Wake Up Now</span>
                 <LogOut size={12} />
               </button>
             </div>
           )}
-        </div>
+        </motion.div>
       </div>
     );
   }
 
   // Render Form Runner (active questions)
   return (
-    <div className={`min-h-screen ${styles.bg} flex flex-col items-center justify-center p-6 md:p-8 font-mono relative overflow-hidden`}>
+    <div className={`skin-${form.theme} min-h-screen bg-[var(--theme-bg)] text-[var(--theme-text)] flex flex-col items-center justify-center p-6 md:p-8 font-mono relative overflow-hidden`}>
       {/* Background grids */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,currentColor_1px,transparent_1px),linear-gradient(to_bottom,currentColor_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-3 pointer-events-none" />
 
       {/* "The Kick" White Flash Overlay */}
-      <div
-        className={`fixed inset-0 bg-white z-50 pointer-events-none transition-opacity duration-300 ${
-          showFlash ? "opacity-100" : "opacity-0"
-        }`}
-      />
+      <AnimatePresence>
+        {showFlash && (
+          form.theme === "dark_knight" ? (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: [0, 1, 0, 1, 0] }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2, ease: "linear" }}
+              className="fixed inset-0 bg-white z-50 pointer-events-none mix-blend-difference"
+            />
+          ) : form.theme === "tenet" && process.env.NEXT_PUBLIC_REFRESH_SECRET ? (
+            <motion.div
+              initial={{ opacity: 1, scale: 1.5 }}
+              animate={{ opacity: 0, scale: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3, ease: "easeIn" }}
+              className="fixed inset-0 bg-red-900 z-50 pointer-events-none mix-blend-color-burn"
+            />
+          ) : form.theme === "interstellar" ? (
+             <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 2, ease: "easeOut" }}
+              className="fixed inset-0 bg-black z-50 pointer-events-none"
+            />
+          ) : (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.8, ease: "easeInOut" }}
+              className="fixed inset-0 bg-white z-50 pointer-events-none"
+            />
+          )
+        )}
+      </AnimatePresence>
 
-      <div className={`w-full max-w-2xl border p-8 rounded-lg flex flex-col justify-between min-h-[460px] relative ${styles.cardBg} ${styles.glow} transition-all duration-300`}>
+      <div className={`w-full max-w-2xl border p-8 rounded-lg flex flex-col justify-between min-h-[460px] relative bg-[var(--theme-surface)] border-[var(--theme-border)] shadow-[0_0_15px_var(--theme-border)]  transition-all duration-300`}>
         
         {/* Top bar: Form Title & Totem */}
         <div className="flex items-center justify-between border-b border-current/10 pb-4">
@@ -342,27 +421,42 @@ export function FormRunner({ form, fields, passcode, styles }: FormRunnerProps) 
           </div>
         </div>
 
-        {/* Middle Area: Question Renderer with slide-down/fade animate key */}
-        <div key={currentIndex} className="flex-1 py-8 flex flex-col justify-center animate-in fade-in slide-in-from-bottom-8 duration-300">
-          {currentField ? (
-            <FieldRenderer
-              field={currentField}
-              value={answers[currentField.id]}
-              onChange={handleValueChange}
-              styles={styles}
-              error={errors[currentField.id]}
-              onAutoAdvance={handleNext}
-            />
-          ) : (
-            <div className="text-center text-xs opacity-50 uppercase tracking-widest">
-              Limbo detected: No fields projected.
-            </div>
-          )}
+        {/* Middle Area: Question Renderer with Framer Motion AnimatePresence */}
+        <div className="flex-1 py-8 flex flex-col justify-center relative overflow-hidden">
+          <AnimatePresence mode="wait" custom={direction}>
+            <motion.div
+              key={currentIndex}
+              custom={direction}
+              variants={shouldReduceMotion ? reducedVariants : variants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="w-full flex-1 flex flex-col justify-center"
+            >
+              {currentField ? (
+                <FieldRenderer
+                  field={currentField}
+                  value={answers[currentField.id]}
+                  onChange={handleValueChange}
+                  
+                  error={errors[currentField.id]}
+                  onAutoAdvance={handleNext}
+                />
+              ) : (
+                <div className="text-center text-xs opacity-50 uppercase tracking-widest">
+                  Limbo detected: No fields projected.
+                </div>
+              )}
+            </motion.div>
+          </AnimatePresence>
         </div>
 
         {/* Bottom Area: Progress & Controls */}
         <div className="border-t border-current/10 pt-4 flex flex-col space-y-4">
-          <ProgressBar currentIndex={currentIndex} total={fields.length} />
+          <div className={form.theme === 'tenet' ? 'origin-right scale-x-[-1]' : ''}>
+              <ProgressBar currentIndex={currentIndex} total={fields.length} />
+            </div>
 
           <div className="flex items-center justify-between">
             {/* Back button */}
@@ -390,7 +484,7 @@ export function FormRunner({ form, fields, passcode, styles }: FormRunnerProps) 
               type="button"
               onClick={handleNext}
               disabled={submitStatus === "submitting"}
-              className={`px-5 py-2.5 rounded text-xs font-bold uppercase tracking-widest border transition-all cursor-pointer inline-flex items-center space-x-2 ${styles.btn}`}
+              className={`px-5 py-2.5 rounded text-xs font-bold uppercase tracking-widest border transition-all cursor-pointer inline-flex items-center space-x-2 bg-[var(--theme-accent)] text-[var(--theme-bg)] border-[var(--theme-accent)] hover:opacity-90`}
             >
               {submitStatus === "submitting" ? (
                 <>

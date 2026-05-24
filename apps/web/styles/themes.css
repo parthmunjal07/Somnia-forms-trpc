@@ -1,0 +1,95 @@
+@layer base {
+  .skin-inception {
+    --theme-bg: #0D1117;
+    --theme-surface: #111820;
+    --theme-border: rgba(139, 163, 191, 0.12);
+    --theme-accent: #C9933A;
+    --theme-accent-secondary: #4A9EFF;
+    --theme-text: #C8D8E8;
+    --theme-muted: #8BA3BF;
+    --theme-heading-font: var(--font-cormorant);
+    --theme-radius: 0px;
+    --theme-progress-height: 1px;
+    color-scheme: dark;
+    /* Grid background */
+    background-color: var(--theme-bg);
+    background-image: linear-gradient(rgba(139,163,191,0.025) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(139,163,191,0.025) 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
+
+  .skin-dark_knight {
+    --theme-bg: #080808;
+    --theme-surface: #0F0F0F;
+    --theme-border: rgba(255, 255, 255, 0.06);
+    --theme-accent: #F5C542;
+    --theme-accent-secondary: rgba(255, 255, 255, 0.2);
+    --theme-text: #D4D4D4;
+    --theme-muted: #666666;
+    --theme-heading-font: var(--font-mono);
+    --theme-radius: 0px;
+    --theme-progress-height: 2px;
+    color-scheme: dark;
+    /* Vertical scanline background */
+    background-color: var(--theme-bg);
+    background-image: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(255, 255, 255, 0.008) 2px,
+      rgba(255, 255, 255, 0.008) 4px
+    );
+  }
+
+  .skin-interstellar {
+    --theme-bg: #0A0705;
+    --theme-surface: #110E0A;
+    --theme-border: rgba(210, 175, 120, 0.1);
+    --theme-accent: #D4A847;
+    --theme-accent-secondary: #7EB8D4;
+    --theme-tertiary: #8B6914;
+    --theme-text: #C4B49A;
+    --theme-muted: #6B5A42;
+    --theme-heading-font: var(--font-cormorant);
+    --theme-radius: 0px;
+    --theme-progress-height: 1px;
+    color-scheme: dark;
+    /* Faint star field effect using radial gradients */
+    background-color: var(--theme-bg);
+    background-image: 
+      radial-gradient(circle at 15% 50%, rgba(255, 255, 255, 0.15) 1px, transparent 1px),
+      radial-gradient(circle at 85% 30%, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+      radial-gradient(circle at 50% 80%, rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+      radial-gradient(circle at 25% 20%, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    background-size: 100px 100px;
+  }
+
+  .skin-tenet {
+    --theme-bg: #F5F4F0;
+    --theme-surface: #FFFFFF;
+    --theme-border: rgba(0, 0, 0, 0.1);
+    --theme-accent: #C0392B;
+    --theme-accent-secondary: #2980B9;
+    --theme-text: #1A1A1A;
+    --theme-muted: #888888;
+    --theme-heading-font: var(--font-mono);
+    --theme-radius: 0px;
+    --theme-progress-height: 2px;
+    color-scheme: light;
+    background-color: var(--theme-bg);
+  }
+}
+
+.skin-tenet::after {
+  content: 'CLASSIFIED';
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-35deg);
+  font-family: var(--font-mono);
+  font-size: 80px;
+  font-weight: bold;
+  color: rgba(0, 0, 0, 0.05);
+  pointer-events: none;
+  z-index: 0;
+}

@@ -291,13 +291,13 @@ const handleLogout = async () => {
             {[1, 2, 3].map((n) => (
               <div
                 key={n}
-                className="h-44 bg-[rgba(255,255,255,0.02)] border border-[rgba(200,216,232,0.1)] rounded p-6 flex flex-col justify-between animate-pulse"
+                className="h-[188px] animate-shimmer border border-[rgba(200,216,232,0.1)] rounded p-6 flex flex-col justify-between overflow-hidden"
               >
-                <div className="space-y-3">
-                  <div className="h-4 bg-stone-800 rounded w-2/3" />
-                  <div className="h-3 bg-stone-800 rounded w-1/2" />
+                <div className="space-y-3 mt-4">
+                  <div className="h-4 bg-[rgba(200,216,232,0.1)] rounded w-2/3" />
+                  <div className="h-3 bg-[rgba(200,216,232,0.1)] rounded w-1/2" />
                 </div>
-                <div className="h-6 bg-stone-800 rounded w-1/3" />
+                <div className="h-6 bg-[rgba(200,216,232,0.1)] rounded w-1/3 mt-6 pt-4 border-t border-[rgba(200,216,232,0.05)]" />
               </div>
             ))}
           </div>

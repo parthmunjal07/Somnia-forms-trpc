@@ -16,14 +16,6 @@ interface FieldRendererProps {
   field: FieldDefinition;
   value: any;
   onChange: (val: any) => void;
-  styles: {
-    bg: string;
-    cardBg: string;
-    input: string;
-    btn: string;
-    accent: string;
-    glow: string;
-  };
   error?: string;
   onAutoAdvance?: () => void;
 }
@@ -32,7 +24,6 @@ export function FieldRenderer({
   field,
   value,
   onChange,
-  styles,
   error,
   onAutoAdvance,
 }: FieldRendererProps) {
@@ -156,7 +147,7 @@ export function FieldRenderer({
             value={value || ""}
             onChange={(e) => onChange(e.target.value)}
             placeholder="Type your answer here..."
-            className={`w-full rounded border px-4 py-3 text-sm focus:outline-none transition-all font-mono ${styles.input}`}
+            className={`w-full rounded border px-4 py-3 text-sm focus:outline-none transition-all font-mono bg-[var(--theme-surface)] border-[var(--theme-border)] text-[var(--theme-text)] focus:border-[var(--theme-accent)] focus:ring-1 focus:ring-[var(--theme-accent)]`}
           />
         )}
 
@@ -167,7 +158,7 @@ export function FieldRenderer({
             onChange={(e) => onChange(e.target.value)}
             placeholder="Type your response parameters..."
             rows={4}
-            className={`w-full rounded border px-4 py-3 text-sm focus:outline-none transition-all font-mono resize-none h-28 ${styles.input}`}
+            className={`w-full rounded border px-4 py-3 text-sm focus:outline-none transition-all font-mono resize-none h-28 bg-[var(--theme-surface)] border-[var(--theme-border)] text-[var(--theme-text)] focus:border-[var(--theme-accent)] focus:ring-1 focus:ring-[var(--theme-accent)]`}
           />
         )}
 
@@ -178,7 +169,7 @@ export function FieldRenderer({
             value={value || ""}
             onChange={(e) => onChange(e.target.value)}
             placeholder="e.g. name@dreamscape.com"
-            className={`w-full rounded border px-4 py-3 text-sm focus:outline-none transition-all font-mono ${styles.input}`}
+            className={`w-full rounded border px-4 py-3 text-sm focus:outline-none transition-all font-mono bg-[var(--theme-surface)] border-[var(--theme-border)] text-[var(--theme-text)] focus:border-[var(--theme-accent)] focus:ring-1 focus:ring-[var(--theme-accent)]`}
           />
         )}
 
@@ -192,7 +183,7 @@ export function FieldRenderer({
               onChange(val === "" ? undefined : Number(val));
             }}
             placeholder="Enter numeric coefficient..."
-            className={`w-full rounded border px-4 py-3 text-sm focus:outline-none transition-all font-mono ${styles.input}`}
+            className={`w-full rounded border px-4 py-3 text-sm focus:outline-none transition-all font-mono bg-[var(--theme-surface)] border-[var(--theme-border)] text-[var(--theme-text)] focus:border-[var(--theme-accent)] focus:ring-1 focus:ring-[var(--theme-accent)]`}
           />
         )}
 
@@ -308,7 +299,7 @@ export function FieldRenderer({
             type="date"
             value={value || ""}
             onChange={(e) => onChange(e.target.value)}
-            className={`w-full rounded border px-4 py-3 text-sm focus:outline-none transition-all font-mono ${styles.input}`}
+            className={`w-full rounded border px-4 py-3 text-sm focus:outline-none transition-all font-mono bg-[var(--theme-surface)] border-[var(--theme-border)] text-[var(--theme-text)] focus:border-[var(--theme-accent)] focus:ring-1 focus:ring-[var(--theme-accent)]`}
           />
         )}
 

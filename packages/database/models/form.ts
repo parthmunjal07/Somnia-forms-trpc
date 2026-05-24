@@ -24,6 +24,13 @@ export const visibilityEnum = pgEnum("visibility", [
   "unlisted",
 ]);
 
+export const themeEnum = pgEnum("theme", [
+  "inception",
+  "dark_knight",
+  "interstellar",
+  "tenet",
+]);
+
 export const collaboratorRoleEnum = pgEnum("collaborator_role", [
   "THE_FORGER",
   "THE_SHADE",
@@ -52,7 +59,7 @@ export const formsTable = pgTable(
     slug: varchar("slug", { length: 255 }).notNull(),
     status: formStatusEnum("status").default("draft").notNull(),
     visibility: visibilityEnum("visibility").default("public").notNull(),
-    theme: varchar("theme", { length: 50 }).default("classic-dark").notNull(),
+    theme: themeEnum("theme").default("inception").notNull(),
     responseLimit: integer("response_limit"),
     expiresAt: timestamp("expires_at"),
     passwordHash: varchar("password_hash", { length: 255 }),

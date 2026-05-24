@@ -13,9 +13,9 @@ export function Totem({ status, className = "" }: TotemProps) {
   let wobbleClass = "";
 
   if (status === "decelerating") {
-    // Decelerating: spin slower, add wobble
-    spinClass = "animate-[spin_3s_linear_infinite] transition-all duration-[3000ms] ease-out";
-    wobbleClass = "animate-[bounce_1.5s_ease-in-out_infinite]";
+    // Decelerating: spin fast for 0.5s then stop over 1.2s using custom keyframe
+    spinClass = "animate-totem-decelerate";
+    wobbleClass = "";
   } else if (status === "stopped") {
     // Stopped: resting angle, no spin
     spinClass = "rotate-[15deg] transition-all duration-1000 ease-out";

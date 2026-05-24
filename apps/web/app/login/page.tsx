@@ -106,6 +106,15 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get("tab") === "register") {
+        setActiveTab("register");
+      }
+    }
+  }, []);
+
   const loginMutation = trpc.auth.login.useMutation({
     onSuccess: (data) => {
       toast.success("Connection established. Welcome back, Architect.");
