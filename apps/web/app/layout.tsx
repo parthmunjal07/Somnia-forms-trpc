@@ -31,6 +31,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
+      <head>
+        <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+      </head>
       <body className={`${geistSans.variable} ${geistMono.variable} ${cormorant.variable} antialiased font-mono bg-background text-foreground`}>
         <GlobalProviders>{children}</GlobalProviders>
       </body>

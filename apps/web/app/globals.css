@@ -45,6 +45,24 @@
   --color-sidebar-ring: var(--sidebar-ring);
   --animate-spin-slow: spin 10s linear infinite;
   --animate-fog-drift: fog-drift 60s linear infinite;
+  
+  /* Custom UI Colors */
+  --color-limbo: #0D0D0D;
+  --color-totem: #FAC775;
+  --color-primary: #ffe8ca;
+  --color-on-surface: #e5e2e1;
+  --color-text-secondary: #A1A1A1;
+  --color-outline-variant: #4f4538;
+  --color-surface-container-lowest: #0e0e0e;
+  --color-surface-container-high: #2a2a2a;
+  --color-status-success: #9FE1CB;
+  --color-on-tertiary-container: #365f56;
+  --color-tertiary: #c7f5e8;
+  
+  /* Spacings */
+  --spacing-gutter: 16px;
+  --spacing-unit: 4px;
+  --spacing-container-max: 1200px;
 }
 
 @keyframes fog-drift {
@@ -93,5 +111,32 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  }
+  .totem-spin {
+      animation: spin 10s linear infinite;
+  }
+  .totem-spin:hover {
+      animation-play-state: paused;
+  }
+  .fog-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.4;
+  }
+  .glass-card {
+      backdrop-filter: blur(12px);
+      background: rgba(20, 20, 20, 0.7);
+  }
+  .hairline-border {
+      border: 0.5px solid rgba(255, 255, 255, 0.1);
   }
 }
