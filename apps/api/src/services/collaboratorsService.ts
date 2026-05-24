@@ -1,9 +1,11 @@
 import { db } from "@repo/database";
-import { formCollaboratorsTable, usersTable } from "@repo/database/schema";
+import { formCollaboratorsTable, usersTable, formsTable } from "@repo/database/schema";
 import { eq, and } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { can } from "../rbac";
 import { getUserFormRole } from "./formsService";
+import { sendCollaboratorInvite } from "@repo/email";
+import { env } from "../env";
 
 export class CollaboratorsService {
   async list(formId: string, currentUserId: string) {
@@ -45,16 +47,19 @@ export class CollaboratorsService {
     }
 
     const [owner] = await db
-      .select({ subscriptionTier: usersTable.subscriptionTier })
+      .select({ subscriptionTier: usersTable.subscriptionTier, fullName: usersTable.fullName })
       .from(usersTable)
       .where(eq(usersTable.id, currentUserId))
       .limit(1);
+    if (!owner) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "Owner not found" });
+    }
     
-    if (owner?.subscriptionTier === "free") {
+    if (owner.subscriptionTier === "free") {
       throw new TRPCError({ code: "FORBIDDEN", message: "Limbo tier cannot invite collaborators. Please upgrade to Architect or Syndicate." });
     }
 
-    if (owner?.subscriptionTier === "pro" && role !== "THE_FORGER") {
+    if (owner.subscriptionTier === "pro" && role !== "THE_FORGER") {
       throw new TRPCError({ code: "FORBIDDEN", message: "Architect tier can only invite Forgers. Upgrade to Syndicate to invite Shades." });
     }
 
@@ -101,6 +106,24 @@ export class CollaboratorsService {
         acceptedAt: new Date(), 
       })
       .returning();
+
+    // Fetch form title for the email
+    const [form] = await db
+      .select({ title: formsTable.title })
+      .from(formsTable)
+      .where(eq(formsTable.id, formId))
+      .limit(1);
+
+    if (form) {
+      const inviteUrl = env.FRONTEND_URL ? `${env.FRONTEND_URL}/dashboard` : `http://localhost:3000/dashboard`;
+      sendCollaboratorInvite({
+        to: targetEmail,
+        architectName: owner.fullName,
+        formTitle: form.title,
+        roleName: role,
+        inviteUrl,
+      }).catch(console.error);
+    }
 
     return collaborator;
   }

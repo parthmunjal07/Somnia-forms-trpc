@@ -1,3 +1,16 @@
 {
-  "extends": ["@repo/typescript-config/node.json"]
+  "compilerOptions": {
+    "target": "es2022",
+    "lib": ["dom", "dom.iterable", "es2022"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "outDir": "dist"
+  },
+  "include": ["src", "index.ts"],
+  "exclude": ["node_modules", "dist"]
 }

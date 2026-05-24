@@ -15,6 +15,7 @@ import {
   verifyRefreshToken,
 } from "../../lib/tokens";
 import { roleEnum } from "@repo/database/schema";
+import { sendVerificationEmail } from "@repo/email";
 
 const TAGS = ["Authentication"];
 const getPath = generatePath("/auth");
@@ -67,7 +68,13 @@ export const authRouter = router({
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
       });
 
-      // TODO: send verification email with link /verify?token=<token>
+      // Send verification email
+      const baseUrl = process.env.FRONTEND_URL || "http://localhost:3000";
+      await sendVerificationEmail({
+        to: input.email,
+        token,
+        baseUrl,
+      }).catch(console.error);
 
       return { message: "Registration successful. Please verify your email." };
     }),
@@ -103,7 +110,13 @@ export const authRouter = router({
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
       });
 
-      // TODO: send verification email
+      // Send verification email
+      const baseUrl = process.env.FRONTEND_URL || "http://localhost:3000";
+      await sendVerificationEmail({
+        to: input.email,
+        token,
+        baseUrl,
+      }).catch(console.error);
 
       return { message: "If this email is registered, a verification link will be sent." };
     }),

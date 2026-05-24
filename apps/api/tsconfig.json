@@ -5,6 +5,7 @@
     "outDir": "./dist",
     "moduleResolution": "Node",
     "module": "CommonJS",
+    "jsx": "react-jsx",
     // We don't need these for our final build
     "declarationMap": false,
     "declaration": false,

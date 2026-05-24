@@ -12,6 +12,11 @@ import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import { env } from "../env";
 import bcrypt from "bcryptjs";
+import {
+  sendSignalNotification,
+  sendSurfacingConfirmation,
+  sendExpiryWarning,
+} from "@repo/email";
 
 let ratelimit: Ratelimit | null = null;
 if (env.UPSTASH_REDIS_REST_URL && env.UPSTASH_REDIS_REST_TOKEN) {
@@ -55,6 +60,7 @@ export class ResponsesService {
 
     const [form] = await db
       .select({
+        title: formsTable.title,
         userId: formsTable.userId,
         status: formsTable.status,
         expiresAt: formsTable.expiresAt,
@@ -86,7 +92,7 @@ export class ResponsesService {
     }
 
     const [owner] = await db
-      .select({ subscriptionTier: usersTable.subscriptionTier })
+      .select({ subscriptionTier: usersTable.subscriptionTier, email: usersTable.email })
       .from(usersTable)
       .where(eq(usersTable.id, form.userId))
       .limit(1);
@@ -130,6 +136,8 @@ export class ResponsesService {
     const fields = await db
       .select({
         id: fieldsTable.id,
+        label: fieldsTable.label,
+        type: fieldsTable.type,
         required: fieldsTable.required,
       })
       .from(fieldsTable)
@@ -146,7 +154,7 @@ export class ResponsesService {
       }
     }
 
-    return await db.transaction(async (tx) => {
+    const result = await db.transaction(async (tx) => {
       const [response] = await tx
         .insert(responsesTable)
         .values({
@@ -166,6 +174,51 @@ export class ResponsesService {
 
       return response;
     });
+
+    // ─── Trigger Async Emails ────────────────────────────────────────────────
+    const dashboardUrl = env.FRONTEND_URL ? `${env.FRONTEND_URL}/dashboard/forms/${formId}` : `http://localhost:3000/dashboard/forms/${formId}`;
+    
+    // 1. Signal Notification to Creator
+    const fieldPreviews = fields
+      .slice(0, 3)
+      .map((f) => ({
+        label: f.label,
+        value: String(parsedData.data?.[f.id] || "—"),
+      }));
+
+    sendSignalNotification({
+      to: owner.email,
+      formTitle: form.title,
+      timestamp: new Date().toISOString(),
+      fieldPreviews,
+      dashboardUrl,
+    }).catch(console.error);
+
+    // 2. Surfacing Confirmation to Respondent (if email field exists)
+    const emailField = fields.find((f) => f.type === "email");
+    if (emailField) {
+      const respondentEmail = parsedData.data?.[emailField.id];
+      if (respondentEmail && typeof respondentEmail === "string") {
+        sendSurfacingConfirmation({
+          to: respondentEmail,
+          formTitle: form.title,
+          submissionTime: new Date().toISOString(),
+        }).catch(console.error);
+      }
+    }
+
+    // 3. Expiry / Cap Warning Check
+    const newCount = (analytics?.submissionsCount || 0) + 1;
+    if (limitToEnforce < Infinity && newCount >= limitToEnforce * 0.9 && newCount < limitToEnforce) {
+      sendExpiryWarning({
+        to: owner.email,
+        formTitle: form.title,
+        reason: "cap",
+        dashboardUrl,
+      }).catch(console.error);
+    }
+    
+    return result;
   }
 
   async list(

@@ -8,5 +8,6 @@
     "pagination.ts"
   ],
   "compilerOptions": {
+    "jsx": "react-jsx"
   },
 }

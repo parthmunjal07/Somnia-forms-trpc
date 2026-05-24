@@ -22,8 +22,8 @@ function FogAnimation() {
       x: Math.random() * width,
       y: Math.random() * height,
       size: Math.random() * 260 + 120,
-      speedX: (Math.random() - 0.5) * 0.6,
-      speedY: (Math.random() - 0.5) * 0.6,
+      speedX: (Math.random() - 0.5) * 1.2,
+      speedY: (Math.random() - 0.5) * 1.2,
       opacity: Math.random() * 0.06 + 0.02,
       gold: Math.random() > 0.85,
     }));
@@ -193,6 +193,13 @@ const TIERS = [
 // ─── Page ─────────────────────────────────────────────────────────────────────
 export default function Home() {
   const [copied, setCopied] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setIsScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const copyLink = () => {
     void navigator.clipboard.writeText("https://somnia.app");
@@ -217,42 +224,55 @@ export default function Home() {
       />
 
       {/* ── NAVBAR ── */}
-      <header
-        className="fixed top-0 w-full z-50 flex justify-between items-center px-6 py-3"
-        style={{ background: "rgba(10,10,15,0.85)", backdropFilter: "blur(12px)", borderBottom: "0.5px solid rgba(200,216,232,0.07)" }}
+      <div
+        className={`fixed inset-x-0 z-50 flex justify-center transition-all duration-500 ease-in-out pointer-events-none ${isScrolled ? "top-4 px-4" : "top-0 px-0"
+          }`}
       >
-        <div className="flex items-center gap-3">
-          <Totem size={22} className="text-[#C9933A] animate-[spin_10s_linear_infinite]" />
-          <span className="font-cormorant text-2xl text-[#C9933A] tracking-[0.15em]">SOMNIA</span>
-        </div>
+        <header
+          className={`pointer-events-auto flex justify-between items-center px-6 py-3 transition-all duration-500 ease-in-out w-full ${isScrolled
+            ? "max-w-6xl rounded-lg shadow-[0_8px_32px_rgba(0,0,0,0.6)]"
+            : "max-w-full rounded-none"
+            }`}
+          style={{
+            background: isScrolled ? "rgba(10,10,15,0.95)" : "rgba(10,10,15,0.85)",
+            backdropFilter: "blur(12px)",
+            border: isScrolled ? "0.5px solid rgba(200,216,232,0.15)" : "0.5px solid transparent",
+            borderBottom: isScrolled ? "0.5px solid rgba(200,216,232,0.15)" : "0.5px solid rgba(200,216,232,0.07)"
+          }}
+        >
+          <div className="flex items-center gap-3">
+            <Totem size={22} className="text-[#C9933A] animate-[spin_10s_linear_infinite]" />
+            <span className="font-cormorant text-2xl text-[#C9933A] tracking-[0.15em]">SOMNIA</span>
+          </div>
 
-        <nav className="hidden md:flex items-center gap-8">
-          {[["The Workshop", "/dashboard"], ["Constructs", "/pricing"], ["Limbo", "/api/docs"]].map(([label, href]) => (
+          <nav className="hidden md:flex items-center gap-8">
+            {[["The Workshop", "/dashboard"], ["Constructs", "/#pricing"], ["Limbo", "/api/docs"]].map(([label, href]) => (
+              <Link
+                key={label}
+                href={href ?? "/"}
+                className="text-[15px] tracking-[0.16em] uppercase text-[#8BA3BF] hover:text-[#EEF3F8] transition-colors duration-200"
+              >
+                {label}
+              </Link>
+            ))}
+          </nav>
+
+          <div className="flex items-center gap-3">
             <Link
-              key={label}
-              href={href ?? "/"}
-              className="text-[11px] tracking-[0.16em] uppercase text-[#8BA3BF] hover:text-[#EEF3F8] transition-colors duration-200"
+              href="/login"
+              className="text-[13px] tracking-[0.14em] uppercase text-[#8BA3BF] hover:text-[#EEF3F8] transition-colors"
             >
-              {label}
+              Log In
             </Link>
-          ))}
-        </nav>
-
-        <div className="flex items-center gap-3">
-          <Link
-            href="/login"
-            className="text-[11px] tracking-[0.14em] uppercase text-[#8BA3BF] hover:text-[#EEF3F8] transition-colors"
-          >
-            Log In
-          </Link>
-          <Link
-            href="/register"
-            className="px-5 py-2 bg-[#C9933A] text-[#0A0A0F] text-[10px] font-bold tracking-[0.16em] uppercase rounded-sm hover:bg-[#E8B455] transition-all hover:shadow-[0_0_20px_rgba(201,147,58,0.3)]"
-          >
-            Plant a Dream
-          </Link>
-        </div>
-      </header>
+            <Link
+              href="/register"
+              className="px-5 py-2 bg-[#C9933A] text-[#0A0A0F] text-[13px] font-bold tracking-[0.16em] uppercase rounded-sm hover:bg-[#E8B455] transition-all hover:shadow-[0_0_20px_rgba(201,147,58,0.3)]"
+            >
+              Plant a Dream
+            </Link>
+          </div>
+        </header>
+      </div>
 
       <div className="relative z-10 pt-20">
 
@@ -276,9 +296,8 @@ export default function Home() {
             <em className="italic text-[#C9933A]">Dream.</em>
           </h1>
 
-          <p className="text-[16px] text-[#8BA3BF] tracking-[0.18em] uppercase leading-[2.2] max-w-3xl mb-14">
-            Architect powerful, multi-layered forms. Share signals with Forgers and Shades.
-            Read the projection. Control the dreamscape.
+          <p className="text-[16px] text-[#8BA3BF] tracking-[0.18em] uppercase leading-[2.2] max-w-4xl mb-14">
+            Architect powerful <span className="mx-4" /> multi-layered forms <span className="mx-4" /> Share signals with Forgers and Shades <span className="mx-4" /> Read the projection <span className="mx-4" /> Control the dreamscape
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 mb-20">
@@ -290,7 +309,7 @@ export default function Home() {
               <span className="group-hover:translate-x-1 transition-transform">→</span>
             </Link>
             <Link
-              href="/pricing"
+              href="/#pricing"
               className="px-10 py-4 text-[#8BA3BF] text-[15px] tracking-[0.1em] uppercase rounded-sm hover:text-[#EEF3F8] transition-all"
               style={{ border: "0.5px solid rgba(139,163,191,0.2)" }}
             >
@@ -511,6 +530,7 @@ export default function Home() {
         {/* PRICING PREVIEW                                                 */}
         {/* ══════════════════════════════════════════════════════════════ */}
         <section
+          id="pricing"
           className="py-24 px-4"
           style={{ borderTop: "0.5px solid rgba(200,216,232,0.06)" }}
         >
@@ -609,17 +629,17 @@ export default function Home() {
               <span className="font-cormorant text-2xl text-[#C9933A] tracking-[0.15em]">SOMNIA</span>
             </div>
             <div className="flex gap-8">
-              {[["Pricing", "/pricing"], ["API Docs", "/api/docs"], ["Log In", "/login"]].map(([label, href]) => (
+              {[["Pricing", "/#pricing"], ["API Docs", "/api/docs"], ["Log In", "/login"]].map(([label, href]) => (
                 <Link
                   key={label}
                   href={href ?? "/"}
-                  className="text-[9px] tracking-[0.16em] uppercase text-[#8BA3BF]/30 hover:text-[#8BA3BF]/60 transition-colors"
+                  className="text-[14px] tracking-[0.16em] uppercase text-[#8BA3BF]/30 hover:text-[#8BA3BF]/60 transition-colors"
                 >
                   {label}
                 </Link>
               ))}
             </div>
-            <p className="text-[9px] tracking-[0.14em] uppercase text-[#8BA3BF]/20">
+            <p className="text-[14px] tracking-[0.14em] uppercase text-[#8BA3BF]/20">
               © SOMNIA // 2025
             </p>
           </div>
