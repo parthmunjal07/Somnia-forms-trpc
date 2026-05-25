@@ -489,7 +489,7 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
 
                 <div className="h-64 w-full text-xs">
                   {isMounted && dailyStats && dailyStats.length > 0 ? (
-                    <ResponsiveContainer width="100%" height="100%">
+                    <ResponsiveContainer width="99%" height="100%">
                       <LineChart data={dailyStats} margin={{ top: 5, right: 10, left: -25, bottom: 5 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="rgba(200,216,232,0.05)" />
                         <XAxis dataKey="date" stroke="rgba(200,216,232,0.2)" tickFormatter={(str) => str.slice(5)} />

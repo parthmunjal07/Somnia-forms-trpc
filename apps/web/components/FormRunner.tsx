@@ -19,9 +19,11 @@ interface FormRunnerProps {
   };
   fields: FieldDefinition[];
   passcode?: string;
+  isPreview?: boolean;
+  onSimulateSubmit?: (data: Record<string, any>) => void;
 }
 
-export function FormRunner({ form, fields, passcode} : FormRunnerProps) {
+export function FormRunner({ form, fields, passcode, isPreview, onSimulateSubmit} : FormRunnerProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(1);
   const shouldReduceMotion = useReducedMotion();
@@ -231,12 +233,17 @@ export function FormRunner({ form, fields, passcode} : FormRunnerProps) {
     const elapsedSeconds = Math.max(1, Math.round((Date.now() - startedAt.current) / 1000));
 
     try {
-      await submitMutation.mutateAsync({
-        formId: form.id,
-        data: answers,
-        password: passcode,
-        timeToComplete: elapsedSeconds,
-      });
+      if (isPreview && onSimulateSubmit) {
+        onSimulateSubmit(answers);
+        await new Promise((resolve) => setTimeout(resolve, 800));
+      } else {
+        await submitMutation.mutateAsync({
+          formId: form.id,
+          data: answers,
+          password: passcode,
+          timeToComplete: elapsedSeconds,
+        });
+      }
 
       // Submit success: trigger "kick/flash" effect & totem deceleration
       setSubmitStatus("success");

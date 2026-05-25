@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import IntroAnimation from "../components/IntroAnimation";
 
 // ─── Fog Canvas ───────────────────────────────────────────────────────────────
 function FogAnimation() {
@@ -272,6 +273,7 @@ const TIERS = [
 export default function Home() {
   const [copied, setCopied] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [introComplete, setIntroComplete] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
@@ -285,9 +287,25 @@ export default function Home() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const prefersReduced = typeof window !== "undefined"
+    && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  const hasSeenIntro = typeof window !== "undefined"
+    && localStorage.getItem("somnia_intro_seen") === "true";
+
   return (
     <main className="relative bg-[#0A0A0F] text-[#C8D8E8] font-mono overflow-x-hidden min-h-screen selection:bg-[#C9933A]/20 selection:text-[#E8B455]">
       <FogAnimation />
+
+      {!introComplete && (
+        <IntroAnimation
+          onComplete={() => setIntroComplete(true)}
+          skip={prefersReduced || hasSeenIntro}
+        />
+      )}
+
+      {/* Page content — visible but covered by overlay until introComplete */}
+      <div style={{ opacity: introComplete ? 1 : 0, transition: "opacity 0s" }}>
 
       {/* Grid bg */}
       <div
@@ -974,6 +992,7 @@ export default function Home() {
             </p>
           </div>
         </footer>
+      </div>
       </div>
     </main>
   );
