@@ -5,7 +5,7 @@ import React, { useEffect, useRef } from "react";
 export interface FieldDefinition {
   id: string;
   label: string;
-  type: "short_text" | "long_text" | "email" | "number" | "single_select" | "multi_select" | "checkbox" | "date" | "rating";
+  type: "short_text" | "long_text" | "email" | "number" | "single_select" | "multi_select" | "checkbox" | "date" | "rating" | "layer_break";
   required: boolean;
   placeholder: string | null;
   options: any | null; // string[] for select, number/max info for rating
@@ -17,7 +17,6 @@ interface FieldRendererProps {
   value: any;
   onChange: (val: any) => void;
   error?: string;
-  onAutoAdvance?: () => void;
 }
 
 export function FieldRenderer({
@@ -25,7 +24,6 @@ export function FieldRenderer({
   value,
   onChange,
   error,
-  onAutoAdvance,
 }: FieldRendererProps) {
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
 
@@ -83,10 +81,6 @@ export function FieldRenderer({
           
           if (field.type === "single_select") {
             onChange(targetOpt);
-            // Trigger auto-advance if available
-            if (onAutoAdvance) {
-              setTimeout(onAutoAdvance, 200);
-            }
           } else {
             // Multi select toggling
             const currentList = Array.isArray(value) ? [...value] : [];
@@ -107,9 +101,6 @@ export function FieldRenderer({
         if (ratingVal >= 1 && ratingVal <= maxRating) {
           e.preventDefault();
           onChange(ratingVal);
-          if (onAutoAdvance) {
-            setTimeout(onAutoAdvance, 200);
-          }
         }
       }
 
@@ -122,7 +113,7 @@ export function FieldRenderer({
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [field.id, field.type, options, value, maxRating, onChange, onAutoAdvance]);
+  }, [field.id, field.type, options, value, maxRating, onChange]);
 
   return (
     <div className="w-full flex flex-col space-y-3 font-mono animate-in fade-in duration-300">
@@ -199,9 +190,6 @@ export function FieldRenderer({
                   type="button"
                   onClick={() => {
                     onChange(opt);
-                    if (onAutoAdvance) {
-                      setTimeout(onAutoAdvance, 200);
-                    }
                   }}
                   className={`flex items-center justify-between px-4 py-3 rounded border text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer text-left ${
                     isSelected
@@ -316,9 +304,6 @@ export function FieldRenderer({
                     type="button"
                     onClick={() => {
                       onChange(ratingNum);
-                      if (onAutoAdvance) {
-                        setTimeout(onAutoAdvance, 200);
-                      }
                     }}
                     className={`flex-1 aspect-square max-w-[52px] rounded border flex flex-col items-center justify-center transition-all cursor-pointer ${
                       isSelected

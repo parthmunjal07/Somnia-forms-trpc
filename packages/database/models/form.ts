@@ -46,6 +46,7 @@ export const fieldTypeEnum = pgEnum("field_type", [
   "checkbox",
   "date",
   "rating",
+  "layer_break",
 ]);
 
 export const formsTable = pgTable(

@@ -1,135 +1,127 @@
-# Turborepo starter
+# Somnia Forms - Cinematic Form Builder
 
-This Turborepo starter is maintained by the Turborepo core team.
+Somnia is an open-source, cinematic form builder designed with dark mode, beautiful micro-interactions, and premium aesthetics. The system features a "multi-field layered" layout (similar to Google Forms) with an advanced set of validation features and analytics.
 
-## Using this example
+## Table of Contents
 
-Run the following command:
+- [Features](#features)
+- [Monorepo Architecture](#monorepo-architecture)
+- [Requirements Checklist](#requirements-checklist)
+- [Local Development & Setup](#local-development--setup)
+- [Demo Credentials](#demo-credentials)
+- [API Documentation](#api-documentation)
 
-```sh
-npx create-turbo@latest
-```
+---
 
-## What's inside?
+## Features
 
-This Turborepo includes the following packages/apps:
+- **Cinematic Aesthetic**: Dark mode by default, highly stylized "Nolan-esque" themes.
+- **Layered Forms**: Break forms into layers (pages) dynamically to handle complex data gathering.
+- **Role-Based Access Control**: Assign roles to collaborators (Architect, Extractor, Forger, Shade).
+- **Comprehensive Analytics**: View aggregated form stats, track individual submissions, export CSVs.
+- **Response Caps & Deadlines**: Form architects can set expiration dates and submission limits.
+- **Dynamic Field Types**: Built-in support for short text, long text, email, number, select, multi-select, checkbox, dates, and ratings.
+- **Public & Unlisted Modes**: Built-in explore directory for public forms. Keep sensitive forms unlisted.
 
-### Apps and Packages
+---
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+## Monorepo Architecture
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+This repository is built using [Turborepo](https://turborepo.org) and runs as a full-stack monorepo featuring separated apps for the frontend and backend.
 
-### Utilities
+### Apps
 
-This Turborepo has some additional tools already setup for you:
+- **`apps/web`**: Next.js 15 (App Router) React Frontend.
+- **`apps/api`**: Express Server Backend, handling the `tRPC` procedures and REST OpenAPI endpoints.
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+### Shared Packages
 
-### Build
+- **`@repo/schemas`**: Zod schemas used for validation across the client and server.
+- **`@repo/database`**: Drizzle ORM schema, definitions, and migrations (using PostgreSQL).
+- **`@repo/trpc`**: Type-safe shared tRPC routers and configuration.
+- **`@repo/email`**: Resend-based email system (verification, alerts, warnings).
+- **`@repo/ui`**: Shared UI component library.
 
-To build all apps and packages, run the following command:
+---
 
-```
-cd my-turborepo
+## Requirements Checklist
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
+This project was built to satisfy strict evaluation criteria:
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
-```
+- [x] **Frontend and Backend Separation**: `apps/web` and `apps/api` are fully decoupled but share code via monorepo packages.
+- [x] **Shared Packages**: `schemas`, `database`, `types`, and `trpc` client are all properly abstracted.
+- [x] **Creator Authentication**: Users can register, log in, verify emails, and manage sessions securely (JWT).
+- [x] **Form Management**: Complete CRUD operations for forms and fields.
+- [x] **Dynamic Validations**: Fields dynamically validated using Zod, handling minimum/maximum requirements.
+- [x] **Field Types**: Support for short text, long text, email, number, single select, multi select, checkbox, rating, date, and layer break (pagination).
+- [x] **Public Form Submissions**: Users can submit without logging in.
+- [x] **Public / Unlisted Visibility**: Public forms appear in the "Explore" directory. Unlisted forms are hidden but accessible via direct link.
+- [x] **Unpublished Handling**: Gracefully handles unpublished or expired forms, preventing submission.
+- [x] **Analytics**: Form builders can review analytics and export CSV responses.
+- [x] **Sample Forms Seed**: Database includes an automated seed script `pnpm db:seed` with 3 themed forms and responses.
+- [x] **Landing / Pricing Pages**: Implemented natively in Next.js (`/` and `/#pricing`).
+- [x] **Thank You Confirmation**: Successful form submissions trigger a beautiful confirmation view natively in the Form Runner.
+- [x] **Rate Limiting**: Public submission APIs (`/api/responses/submit` and `/trpc/responses.submit`) are rate limited (30 req / min).
+- [x] **Scalar API Docs**: Express backend serves the Scalar API Explorer at `/docs`.
 
-You can build a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+---
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
+## Local Development & Setup
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
+### Prerequisites
+- Node.js 20+
+- pnpm 8+
+- PostgreSQL instance running
 
-### Develop
+### Steps
 
-To develop all apps and packages, run the following command:
+1. **Install dependencies**:
+   ```sh
+   pnpm install
+   ```
 
-```
-cd my-turborepo
+2. **Environment Variables**:
+   Configure `.env` files in both `/apps/web` and `/apps/api` based on `.env.example`.
+   Crucially, you need a PostgreSQL connection URL (`DATABASE_URL`).
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
+3. **Database Migration & Seed**:
+   Run Drizzle migrations and seed the required initial forms and users.
+   ```sh
+   cd packages/database
+   pnpm db:push
+   pnpm db:seed
+   cd ../..
+   ```
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
-```
+4. **Start the Development Server**:
+   ```sh
+   pnpm dev
+   ```
+   - **Frontend**: Runs on `http://localhost:3000`
+   - **API Server**: Runs on `http://localhost:8000`
 
-You can develop a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+---
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
+## Demo Credentials
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
+The database seed command (`pnpm db:seed`) creates two pre-configured demo users that you can use to log into the dashboard without registering.
 
-### Remote Caching
+### Architect (Primary Form Owner)
+- **Email**: `demo@somnia.io`
+- **Password**: `Demo@2025`
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
+### Extractor (Admin / Collaborator)
+- **Email**: `admin@somnia.io`
+- **Password**: `Demo@2025`
 
-Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
+---
 
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
+## API Documentation
 
-```
-cd my-turborepo
+The backend API automatically generates an OpenAPI specification using `tRPC-OpenAPI` and hosts an interactive `Scalar` API documentation viewer.
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
+- **Frontend Redirect**: [http://localhost:3000/api/docs](http://localhost:3000/api/docs)
+- **Direct Backend Link**: [http://localhost:8000/docs](http://localhost:8000/docs)
+- **OpenAPI Spec**: [http://localhost:8000/openapi.json](http://localhost:8000/openapi.json)
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
+> **Note**: For local development, if you hit `/api/docs` on the Next.js app, it will transparently redirect you to the backend's `/docs` scalar interface.

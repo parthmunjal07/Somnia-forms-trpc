@@ -28,6 +28,8 @@ export async function compileFormSchema(formId: string) {
     let fieldSchema: z.ZodTypeAny;
 
     switch (field.type) {
+      case "layer_break":
+        continue;
       case "short_text":
       case "long_text": {
         let stringSchema = z.string();

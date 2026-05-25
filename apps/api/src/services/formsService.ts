@@ -218,6 +218,47 @@ export class FormsService {
     return { form, fields };
   }
 
+  async listPublic(opts: { limit: number; cursor?: string }) {
+    const limit = opts.limit + 1;
+    let cursorDate: Date | null = null;
+
+    if (opts.cursor) {
+      cursorDate = new Date(opts.cursor);
+    }
+
+    const forms = await db
+      .select({
+        id: formsTable.id,
+        title: formsTable.title,
+        slug: formsTable.slug,
+        theme: formsTable.theme,
+        createdAt: formsTable.createdAt,
+        userId: formsTable.userId,
+      })
+      .from(formsTable)
+      .where(
+        and(
+          eq(formsTable.status, "published"),
+          eq(formsTable.visibility, "public"),
+          cursorDate ? lt(formsTable.createdAt, cursorDate) : undefined
+        )
+      )
+      .orderBy(desc(formsTable.createdAt))
+      .limit(limit);
+
+    let nextCursor: string | undefined = undefined;
+
+    if (forms.length > opts.limit) {
+      const nextItem = forms.pop();
+      nextCursor = nextItem?.createdAt?.toISOString();
+    }
+
+    return {
+      items: forms,
+      nextCursor,
+    };
+  }
+
   async verifyPassword(slug: string, password?: string) {
     const [form] = await db
       .select({ passwordHash: formsTable.passwordHash })

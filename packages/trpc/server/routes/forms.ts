@@ -57,6 +57,13 @@ export const formsRouter = router({
       return formsService.list(ctx.user.id, input);
     }),
 
+  listPublic: publicProcedure
+    .input(paginationInput)
+    .output(z.any())
+    .query(async ({ input }: { input: any }) => {
+      return formsService.listPublic(input);
+    }),
+
   getById: protectedProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ input, ctx }: { input: any, ctx: any }) => {

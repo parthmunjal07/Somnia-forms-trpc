@@ -92,11 +92,22 @@ const refreshLimiter = rateLimit({
   limit: 30,
   message: { error: "Too many refresh attempts" },
 });
+const responseSubmissionLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  limit: 30, // 30 requests per minute
+  message: { error: "Too many response submissions. Please wait a minute." },
+  standardHeaders: true, // Return standard rate limit info headers
+  legacyHeaders: false, // Disable the X-RateLimit-* headers
+});
 
 // Apply rate limiters to specific tRPC auth paths
 app.use("/trpc/auth.register", registerLimiter);
 app.use("/trpc/auth.login", loginLimiter);
 app.use("/trpc/auth.me", refreshLimiter);
+
+// Apply rate limiters to public response submission endpoints
+app.use("/trpc/responses.submit", responseSubmissionLimiter);
+app.use("/api/responses/submit", responseSubmissionLimiter);
 
 // ─── CSRF Endpoint ────────────────────────────────────────────────────────────
 app.get("/api/csrf", (_req, res) => {

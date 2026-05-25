@@ -52,6 +52,7 @@ export const addFieldSchema = z.object({
     "checkbox",
     "date",
     "rating",
+    "layer_break",
   ]),
   required: z.boolean().default(false),
   placeholder: z.string().optional(),
@@ -73,6 +74,7 @@ export const updateFieldSchema = z.object({
       "checkbox",
       "date",
       "rating",
+      "layer_break",
     ])
     .optional(),
   required: z.boolean().optional(),

@@ -415,6 +415,7 @@ export default function Home() {
               {(
                 [
                   ["Form Builder", "/dashboard"],
+                  ["Explore", "/explore"],
                   ["Pricing", "/#pricing"],
                   ["API Docs", "/api/docs"],
                 ] as [string, string][]

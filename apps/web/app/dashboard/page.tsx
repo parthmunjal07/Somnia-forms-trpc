@@ -229,6 +229,11 @@ const handleLogout = async () => {
           <span className="hidden sm:inline text-[9px] border border-[rgba(200,216,232,0.1)] text-[#8BA3BF] px-1.5 py-0.5 rounded tracking-widest uppercase">
             v1.0.0
           </span>
+          <div className="hidden md:flex pl-4 border-l border-[rgba(200,216,232,0.1)]">
+            <a href="/explore" className="text-[11px] tracking-[0.15em] uppercase text-[#8BA3BF] hover:text-[#EEF3F8] transition-colors">
+              Explore
+            </a>
+          </div>
         </div>
 
         <div className="flex items-center space-x-6">

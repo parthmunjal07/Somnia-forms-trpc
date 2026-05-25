@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { trpc } from "~/trpc/client";
 import { toast } from "sonner";
 import { ArrowLeft, ArrowRight, CornerDownLeft, RefreshCw, LogOut } from "lucide-react";
@@ -24,11 +24,31 @@ interface FormRunnerProps {
 }
 
 export function FormRunner({ form, fields, passcode, isPreview, onSimulateSubmit} : FormRunnerProps) {
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentLayerIndex, setCurrentLayerIndex] = useState(0);
   const [direction, setDirection] = useState(1);
   const shouldReduceMotion = useReducedMotion();
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const layers = useMemo(() => {
+    const result: { title: string | null; fields: FieldDefinition[] }[] = [];
+    let currentChunk: FieldDefinition[] = [];
+    let currentTitle: string | null = null;
+    
+    fields.forEach((field) => {
+      if (field.type === "layer_break") {
+        result.push({ title: currentTitle, fields: currentChunk });
+        currentChunk = [];
+        currentTitle = field.label;
+      } else {
+        currentChunk.push(field);
+      }
+    });
+    
+    // Push the last chunk
+    result.push({ title: currentTitle, fields: currentChunk });
+    return result;
+  }, [fields]);
 
   const variants = {
     initial: (d: number) => ({
@@ -63,10 +83,11 @@ export function FormRunner({ form, fields, passcode, isPreview, onSimulateSubmit
 
   const submitMutation = trpc.responses.submit.useMutation();
 
-  const currentField = fields[currentIndex];
+  const currentLayer = layers[currentLayerIndex];
 
   // Helper validation matching backend
   const validateField = (field: FieldDefinition, val: any): string | null => {
+    if (field.type === "layer_break") return null;
     const rules = field.validationRules as Record<string, any> | null;
     const isRequired = field.required;
 
@@ -138,19 +159,18 @@ export function FormRunner({ form, fields, passcode, isPreview, onSimulateSubmit
     return null;
   };
 
-  const handleValueChange = (val: any) => {
-    if (!currentField) return;
-    setAnswers((prev) => ({ ...prev, [currentField.id]: val }));
+  const handleValueChange = (field: FieldDefinition, val: any) => {
+    setAnswers((prev) => ({ ...prev, [field.id]: val }));
     
     // Clear validation error dynamically if it becomes valid
-    if (errors[currentField.id]) {
-      const err = validateField(currentField, val);
+    if (errors[field.id]) {
+      const err = validateField(field, val);
       setErrors((prev) => {
         const updated = { ...prev };
         if (!err) {
-          delete updated[currentField.id];
+          delete updated[field.id];
         } else {
-          updated[currentField.id] = err;
+          updated[field.id] = err;
         }
         return updated;
       });
@@ -158,40 +178,43 @@ export function FormRunner({ form, fields, passcode, isPreview, onSimulateSubmit
   };
 
   const handleNext = () => {
-    if (!currentField) return;
+    if (!currentLayer) return;
 
-    // Run validation on active field
-    const activeVal = answers[currentField.id];
-    const validationError = validateField(currentField, activeVal);
+    let layerIsValid = true;
+    const newErrors = { ...errors };
 
-    if (validationError) {
-      setErrors((prev) => ({ ...prev, [currentField.id]: validationError }));
-      toast.error(validationError);
+    currentLayer.fields.forEach(field => {
+      const err = validateField(field, answers[field.id]);
+      if (err) {
+        layerIsValid = false;
+        newErrors[field.id] = err;
+      } else {
+        delete newErrors[field.id];
+      }
+    });
+
+    setErrors(newErrors);
+
+    if (!layerIsValid) {
+      toast.error("Please stabilize all parameters in this layer before proceeding.");
       return;
     }
 
-    // Clear error
-    setErrors((prev) => {
-      const updated = { ...prev };
-      delete updated[currentField.id];
-      return updated;
-    });
-
     const isInverted = form.theme === 'tenet' && process.env.NEXT_PUBLIC_REFRESH_SECRET;
-    if (currentIndex < fields.length - 1) {
+    if (currentLayerIndex < layers.length - 1) {
       setDirection(isInverted ? -1 : 1);
-      setCurrentIndex((prev) => prev + 1);
+      setCurrentLayerIndex((prev) => prev + 1);
     } else {
-      // Last question - initiate submission
+      // Last layer - initiate submission
       handleSubmitForm();
     }
   };
 
   const handleBack = () => {
     const isInverted = form.theme === 'tenet' && process.env.NEXT_PUBLIC_REFRESH_SECRET;
-    if (currentIndex > 0) {
+    if (currentLayerIndex > 0) {
       setDirection(isInverted ? 1 : -1);
-      setCurrentIndex((prev) => prev - 1);
+      setCurrentLayerIndex((prev) => prev - 1);
     }
   };
 
@@ -218,7 +241,7 @@ export function FormRunner({ form, fields, passcode, isPreview, onSimulateSubmit
 
     window.addEventListener("keydown", handleGlobalKeyDown);
     return () => window.removeEventListener("keydown", handleGlobalKeyDown);
-  }, [currentIndex, answers, currentField]);
+  }, [currentLayerIndex, answers, currentLayer]);
 
   const startedAt = useRef<number>(0);
   useEffect(() => {
@@ -410,16 +433,16 @@ export function FormRunner({ form, fields, passcode, isPreview, onSimulateSubmit
         )}
       </AnimatePresence>
 
-      <div className={`w-full max-w-2xl border p-8 rounded-lg flex flex-col justify-between min-h-[460px] relative bg-[var(--theme-surface)] border-[var(--theme-border)] shadow-[0_0_15px_var(--theme-border)]  transition-all duration-300`}>
+      <div className={`w-full max-w-2xl border p-8 rounded-lg flex flex-col justify-between min-h-[460px] max-h-full relative bg-[var(--theme-surface)] border-[var(--theme-border)] shadow-[0_0_15px_var(--theme-border)] transition-all duration-300`}>
         
         {/* Top bar: Form Title & Totem */}
-        <div className="flex items-center justify-between border-b border-current/10 pb-4">
+        <div className="flex items-center justify-between border-b border-current/10 pb-4 shrink-0">
           <div className="truncate">
             <h1 className="text-xl font-light font-cormorant tracking-wide truncate">
               {form.title}
             </h1>
             <p className="text-[8px] uppercase tracking-widest opacity-50 mt-0.5">
-              DEPTH LEVEL: {currentIndex + 1}
+              DEPTH LEVEL: {currentLayerIndex + 1} / {layers.length}
             </p>
           </div>
 
@@ -429,30 +452,34 @@ export function FormRunner({ form, fields, passcode, isPreview, onSimulateSubmit
         </div>
 
         {/* Middle Area: Question Renderer with Framer Motion AnimatePresence */}
-        <div className="flex-1 py-8 flex flex-col justify-center relative overflow-hidden">
+        <div className="flex-1 py-4 flex flex-col relative overflow-y-auto overflow-x-hidden min-h-[250px]">
           <AnimatePresence mode="wait" custom={direction}>
             <motion.div
-              key={currentIndex}
+              key={currentLayerIndex}
               custom={direction}
               variants={shouldReduceMotion ? reducedVariants : variants}
               initial="initial"
               animate="animate"
               exit="exit"
               transition={{ duration: 0.3, ease: "easeInOut" }}
-              className="w-full flex-1 flex flex-col justify-center"
+              className="w-full flex flex-col space-y-10 pb-6"
             >
-              {currentField ? (
-                <FieldRenderer
-                  field={currentField}
-                  value={answers[currentField.id]}
-                  onChange={handleValueChange}
-                  
-                  error={errors[currentField.id]}
-                  onAutoAdvance={handleNext}
-                />
+              {currentLayer && currentLayer.title && (
+                <h2 className="text-xl font-light font-cormorant text-current/90 mb-2 tracking-wide border-b border-current/20 pb-3">{currentLayer.title}</h2>
+              )}
+              {currentLayer && currentLayer.fields.length > 0 ? (
+                currentLayer.fields.map((field) => (
+                  <FieldRenderer
+                    key={field.id}
+                    field={field}
+                    value={answers[field.id]}
+                    onChange={(val) => handleValueChange(field, val)}
+                    error={errors[field.id]}
+                  />
+                ))
               ) : (
-                <div className="text-center text-xs opacity-50 uppercase tracking-widest">
-                  Limbo detected: No fields projected.
+                <div className="text-center text-xs opacity-50 uppercase tracking-widest py-8">
+                  Limbo detected: No parameters projected in this layer.
                 </div>
               )}
             </motion.div>
@@ -460,9 +487,9 @@ export function FormRunner({ form, fields, passcode, isPreview, onSimulateSubmit
         </div>
 
         {/* Bottom Area: Progress & Controls */}
-        <div className="border-t border-current/10 pt-4 flex flex-col space-y-4">
+        <div className="border-t border-current/10 pt-4 flex flex-col space-y-4 shrink-0">
           <div className={form.theme === 'tenet' ? 'origin-right scale-x-[-1]' : ''}>
-              <ProgressBar currentIndex={currentIndex} total={fields.length} />
+              <ProgressBar currentIndex={currentLayerIndex} total={layers.length} />
             </div>
 
           <div className="flex items-center justify-between">
@@ -470,7 +497,7 @@ export function FormRunner({ form, fields, passcode, isPreview, onSimulateSubmit
             <button
               type="button"
               onClick={handleBack}
-              disabled={currentIndex === 0 || submitStatus === "submitting"}
+              disabled={currentLayerIndex === 0 || submitStatus === "submitting"}
               className={`p-2.5 rounded border border-current/15 text-current/60 hover:text-current hover:border-current/40 transition-all cursor-pointer text-xs disabled:opacity-20 disabled:cursor-not-allowed inline-flex items-center space-x-1.5 font-bold uppercase tracking-wider`}
             >
               <ArrowLeft size={14} />
@@ -500,7 +527,7 @@ export function FormRunner({ form, fields, passcode, isPreview, onSimulateSubmit
                 </>
               ) : (
                 <>
-                  <span>{currentIndex === fields.length - 1 ? "Stabilize" : "OK"}</span>
+                  <span>{currentLayerIndex === layers.length - 1 ? "Stabilize" : "OK"}</span>
                   <ArrowRight size={14} />
                 </>
               )}
