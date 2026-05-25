@@ -41,7 +41,7 @@ export default async function PublicFormPage({ params }: PageProps) {
     return (
       <div className="min-h-screen bg-stone-950 flex flex-col items-center justify-center font-mono p-4 selection:bg-red-500/20">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#1c1917_1px,transparent_1px),linear-gradient(to_bottom,#1c1917_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-20 pointer-events-none" />
-        
+
         <div className="max-w-md w-full bg-stone-900/30 border border-red-950/60 p-8 rounded-lg shadow-2xl text-center space-y-6 backdrop-blur-sm animate-in fade-in zoom-in-95 duration-500">
           <div className="mx-auto w-12 h-12 rounded bg-red-950/10 border border-red-900/40 flex items-center justify-center text-red-500 animate-pulse">
             <AlertCircle size={20} />

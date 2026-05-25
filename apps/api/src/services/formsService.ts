@@ -63,10 +63,10 @@ export class FormsService {
         .from(formsTable)
         .where(eq(formsTable.userId, userId));
       
-      if (userForms.length >= 3) {
+      if (userForms.length >= 4) {
         throw new TRPCError({ 
           code: "FORBIDDEN", 
-          message: "Limbo tier is restricted to 3 dreamscapes. Upgrade to Architect to project more." 
+          message: "Limbo tier is restricted to 4 dreamscapes. Upgrade to Architect to project more." 
         });
       }
     }

@@ -1,16 +1,11 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
-import { Cormorant_Garamond } from "next/font/google";
+import { Inter, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 import { GlobalProviders } from "~/providers/global";
 
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-});
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
 });
 
 const cormorant = Cormorant_Garamond({
@@ -37,7 +32,7 @@ export default function RootLayout({
       <head>
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable} ${cormorant.variable} antialiased font-mono bg-background text-foreground`}>
+      <body className={`${inter.variable} ${cormorant.variable} antialiased font-sans bg-background text-foreground`}>
         <NextTopLoader color="#C9933A" height={1} showSpinner={false} shadow={false} />
         <GlobalProviders>
           <PageTransition>{children}</PageTransition>

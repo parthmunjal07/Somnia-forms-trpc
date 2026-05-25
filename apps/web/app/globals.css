@@ -5,6 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  --font-sans: var(--font-inter);
   --font-cormorant: var(--font-cormorant);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -169,5 +170,8 @@
   }
   .hairline-border {
       border: 0.5px solid rgba(255, 255, 255, 0.1);
+  }
+  .tenet-inverted {
+      transform: scaleX(-1);
   }
 }

@@ -4,12 +4,16 @@ import { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuthStore } from "~/lib/store";
 import { trpc } from "~/trpc/client";
+import { useTenetEasterEgg } from "~/hooks/useTenetEasterEgg";
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const { user, isAuthenticated, loading, setUser, clearUser, setLoading } = useAuthStore();
   const meMutation = trpc.auth.me.useMutation();
+
+  // Initialize Tenet cinematic easter egg
+  useTenetEasterEgg();
 
   useEffect(() => {
     const checkAuth = async () => {
