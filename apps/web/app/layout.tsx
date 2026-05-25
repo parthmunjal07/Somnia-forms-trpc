@@ -21,6 +21,7 @@ export const metadata: Metadata = {
 
 import NextTopLoader from "nextjs-toploader";
 import { PageTransition } from "~/components/PageTransition";
+import { AchievementsTracker } from "~/components/AchievementsTracker";
 
 export default function RootLayout({
   children,
@@ -36,6 +37,7 @@ export default function RootLayout({
         <NextTopLoader color="#C9933A" height={1} showSpinner={false} shadow={false} />
         <GlobalProviders>
           <PageTransition>{children}</PageTransition>
+          <AchievementsTracker />
         </GlobalProviders>
       </body>
     </html>

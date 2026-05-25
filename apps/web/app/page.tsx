@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import IntroAnimation from "../components/IntroAnimation";
+import { toast } from "sonner";
 
 // ─── Fog Canvas ───────────────────────────────────────────────────────────────
 function FogAnimation({ isDestabilizing = false }: { isDestabilizing?: boolean }) {
@@ -285,6 +286,49 @@ export default function Home() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [introComplete, setIntroComplete] = useState(false);
   const [isDestabilizing, setIsDestabilizing] = useState(false);
+  const [isInceptionMode, setIsInceptionMode] = useState(false);
+  const [totemClicks, setTotemClicks] = useState<number[]>([]);
+  const [isTotemStopped, setIsTotemStopped] = useState(false);
+
+  const handleTotemClick = () => {
+    const now = Date.now();
+    const recentClicks = [...totemClicks, now].filter((t) => now - t <= 2000); // 5 clicks in 2s
+    setTotemClicks(recentClicks);
+    if (recentClicks.length >= 5 && !isTotemStopped) {
+      setIsTotemStopped(true);
+      import("~/lib/achievements").then(m => m.unlockAchievement("totem_test"));
+      toast("Still dreaming.", {
+        style: { background: "#111", color: "#C9933A", border: "1px solid #C9933A", fontWeight: "bold", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.15em" },
+        duration: 3000
+      });
+      setTimeout(() => setIsTotemStopped(false), 3000);
+      setTotemClicks([]);
+    }
+  };
+
+  // Inception Keyboard Easter Egg
+  useEffect(() => {
+    let typedStr = "";
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (["INPUT", "TEXTAREA"].includes((e.target as HTMLElement).tagName)) return;
+      if (e.key.length === 1) {
+        typedStr += e.key.toLowerCase();
+        if (typedStr.length > 20) typedStr = typedStr.slice(-20);
+        if (typedStr.endsWith("inception")) {
+          typedStr = "";
+          setIsInceptionMode(true);
+          import("~/lib/achievements").then(m => m.unlockAchievement("inception_typed"));
+          toast("You've gone too deep.", {
+            style: { background: "#C9933A", color: "#000", border: "none", fontWeight: "bold" },
+            duration: 3000
+          });
+          setTimeout(() => setIsInceptionMode(false), 3000);
+        }
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
@@ -344,7 +388,10 @@ export default function Home() {
     && localStorage.getItem("somnia_intro_seen") === "true";
 
   return (
-    <main className="relative bg-[#0A0A0F] text-[#C8D8E8] font-mono overflow-x-hidden min-h-screen selection:bg-[#C9933A]/20 selection:text-[#E8B455]">
+    <main 
+      className="relative bg-[#0A0A0F] text-[#C8D8E8] font-mono overflow-x-hidden min-h-screen selection:bg-[#C9933A]/20 selection:text-[#E8B455] transition-transform duration-1000 ease-in-out"
+      style={{ transform: isInceptionMode ? "rotate(180deg)" : "none" }}
+    >
       <FogAnimation isDestabilizing={isDestabilizing} />
 
       {/* Destabilization Message */}
@@ -400,10 +447,12 @@ export default function Home() {
             }}
           >
             <div className="flex items-center gap-3">
-              <Totem
-                size={22}
-                className="text-[#C9933A] animate-[spin_10s_linear_infinite]"
-              />
+              <button onClick={handleTotemClick} className="cursor-pointer focus:outline-none">
+                <Totem
+                  size={22}
+                  className={`text-[#C9933A] transition-all duration-1000 ${isTotemStopped ? "" : "animate-[spin_10s_linear_infinite]"}`}
+                />
+              </button>
               <span className="font-cormorant text-2xl text-[#C9933A] tracking-[0.15em]">
                 SOMNIA
               </span>

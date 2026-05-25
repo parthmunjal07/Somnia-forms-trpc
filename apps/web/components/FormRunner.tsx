@@ -273,6 +273,10 @@ export function FormRunner({ form, fields, passcode, isPreview, onSimulateSubmit
       setTotemStatus("decelerating");
       setShowFlash(true);
       toast.success("Projection parameters synchronized successfully.");
+      
+      if (new Date().getHours() === 0) {
+        import("~/lib/achievements").then(m => m.unlockAchievement("midnight_submission"));
+      }
 
       // Totem stop spin timeout
       setTimeout(() => {
@@ -338,7 +342,7 @@ export function FormRunner({ form, fields, passcode, isPreview, onSimulateSubmit
 
           <div className="space-y-3">
             <h2 className="text-3xl font-light font-cormorant tracking-wide">
-              Projection Stabilized
+              {new Date().getHours() === 0 ? <motion.span animate={{ opacity: [0.3, 1, 0.3] }} transition={{ duration: 4, repeat: Infinity }}>You submitted at the hour of limbo.</motion.span> : "Projection Stabilized"}
             </h2>
             <p className="text-[9px] uppercase tracking-[0.25em] opacity-50 font-bold">
               Cognitive layer inputs recorded

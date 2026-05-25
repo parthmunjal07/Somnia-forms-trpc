@@ -155,6 +155,13 @@ export default function DashboardPage() {
     },
   });
 
+
+  useEffect(() => {
+    if (!isFormsLoading && formsData?.items?.length === 4) {
+      import("~/lib/achievements").then(m => m.unlockAchievement("four_layers"));
+    }
+  }, [formsData?.items?.length, isFormsLoading]);
+
   // Delete form mutation
   const deleteFormMutation = trpc.forms.delete.useMutation({
     onSuccess: () => {
@@ -273,8 +280,21 @@ const handleLogout = async () => {
         {/* Upper Title Area */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h2 className="text-4xl font-light text-stone-100 tracking-wider font-cormorant">
+            <h2 className="text-4xl font-light text-stone-100 tracking-wider font-cormorant flex items-center">
               Projected Dreamscapes
+              {!isFormsLoading && formsData?.items && (
+                <span className="text-2xl text-stone-500 font-sans ml-3">
+                  ({formsData.items.length})
+                </span>
+              )}
+              {!isFormsLoading && formsData?.items?.length === 4 && (
+                <span title="Four layers deep. Cobb would be proud.">
+                  <Sparkles 
+                    size={20} 
+                    className="text-[#E8B455] ml-3 animate-pulse cursor-default hover:drop-shadow-[0_0_12px_#E8B455] transition-all" 
+                  />
+                </span>
+              )}
             </h2>
             <p className="text-[13px] text-[#8BA3BF] uppercase tracking-widest mt-1">
               Active subconscious architectural layers

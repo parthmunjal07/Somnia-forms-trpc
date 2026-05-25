@@ -1,12 +1,39 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { usePathname } from "next/navigation";
+import { toast } from "sonner";
 
 export function PageTransition({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const shouldReduceMotion = useReducedMotion();
+  const [isInverted, setIsInverted] = useState(false);
+
+  useEffect(() => {
+    const konami = ["ArrowUp", "ArrowUp", "ArrowDown", "ArrowDown", "ArrowLeft", "ArrowRight", "ArrowLeft", "ArrowRight", "b", "a"];
+    let index = 0;
+    
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === konami[index]) {
+        index++;
+        if (index === konami.length) {
+          setIsInverted(true);
+          import("~/lib/achievements").then(m => m.unlockAchievement("konami_code"));
+          toast("Temporal anomaly detected.", {
+            style: { background: "#F43F5E", color: "#FFF", border: "none", fontWeight: "bold" },
+            duration: 3000
+          });
+          setTimeout(() => setIsInverted(false), 3000);
+          index = 0;
+        }
+      } else {
+        index = 0;
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
 
   const variants = shouldReduceMotion
     ? {
@@ -38,6 +65,10 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
         animate="animate"
         exit="exit"
         variants={variants}
+        style={{ 
+          filter: isInverted ? "invert(1) hue-rotate(180deg) sepia(0.5)" : "none", 
+          transition: "filter 0.5s ease"
+        }}
       >
         {children}
       </motion.div>
