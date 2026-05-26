@@ -112,6 +112,20 @@ export default function LoginPage() {
       if (urlParams.get("tab") === "register") {
         setActiveTab("register");
       }
+      const err = urlParams.get("error");
+      if (err) {
+        toast.error(decodeURIComponent(err));
+      }
+      if (urlParams.get("verified") === "true") {
+        toast.success("Identity verified successfully. You may now login.");
+      }
+      
+      // Clean up URL parameters after handling them
+      if (err || urlParams.get("verified") || urlParams.get("tab")) {
+        const url = new URL(window.location.href);
+        url.search = "";
+        window.history.replaceState({}, "", url.toString());
+      }
     }
   }, []);
 

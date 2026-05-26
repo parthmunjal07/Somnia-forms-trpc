@@ -580,6 +580,7 @@ JWT_SECRET=your-32-char-secret-key-here-abcdefgh
 REFRESH_SECRET=your-32-char-refresh-secret-here-xyz
 CSRF_SECRET=your-csrf-secret-here
 RESEND_API_KEY=re_your_resend_api_key
+RESEND_FROM_EMAIL=onboarding@resend.dev
 FRONTEND_URL=http://localhost:3000
 ALLOWED_ORIGINS=http://localhost:3000
 UPSTASH_REDIS_REST_URL=https://your-upstash-url
@@ -607,6 +608,7 @@ SKIP_ENV_VALIDATION=true
 | `REFRESH_SECRET` | ✅ | API | Min 32 chars. Signs refresh tokens |
 | `CSRF_SECRET` | ✅ | API | Signs CSRF tokens |
 | `RESEND_API_KEY` | ✅ | API | Resend.com API key for emails |
+| `RESEND_FROM_EMAIL` | ❌ | API | Optional custom sender email (defaults to `Somnia <system@somnia.app>`. Use `onboarding@resend.dev` for unverified Resend domains) |
 | `FRONTEND_URL` | ❌ | API | Default `http://localhost:3000`. Used for OAuth redirects and email links |
 | `ALLOWED_ORIGINS` | ❌ | API | Comma-separated CORS origins. Default `http://localhost:3000` |
 | `BASE_URL` | ❌ | API | Default `http://localhost:8000`. Used for OpenAPI base URL |

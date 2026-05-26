@@ -17,7 +17,7 @@ const getResendClient = () => {
   return new Resend(apiKey);
 };
 
-const FROM_EMAIL = "Somnia <system@somnia.app>";
+const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || "Somnia <system@somnia.app>";
 
 async function sendEmail(
   to: string,
@@ -36,15 +36,21 @@ async function sendEmail(
   }
 
   try {
-    const data = await resend.emails.send({
+    const response = await resend.emails.send({
       from: FROM_EMAIL,
       to,
       subject,
       react: reactElement,
     });
-    return { success: true, data };
+
+    if (response.error) {
+      console.error(`[EMAIL ERROR] Failed to send email to ${to}:`, response.error);
+      return { success: false, error: response.error };
+    }
+
+    return { success: true, data: response.data };
   } catch (error) {
-    console.error("Failed to send email:", error);
+    console.error("Failed to send email (exception):", error);
     return { success: false, error };
   }
 }
