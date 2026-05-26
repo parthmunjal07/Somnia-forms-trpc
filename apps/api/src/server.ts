@@ -116,7 +116,9 @@ app.get("/api/csrf", (_req, res) => {
   res.cookie("csrf_token", csrfToken, {
     // NOT httpOnly — client JS must read this and send it back via X-CSRF-Token header
     secure: env.NODE_ENV === "production",
-    sameSite: "strict",
+    // "none" in production for cross-domain (Vercel frontend → Railway API).
+    // "strict" in development when both run on localhost.
+    sameSite: env.NODE_ENV === "production" ? "none" as const : "strict" as const,
     path: "/",
   });
   return res.json({ csrfToken });

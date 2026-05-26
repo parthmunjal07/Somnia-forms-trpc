@@ -29,7 +29,10 @@ function isProduction() {
 const COOKIE_OPTS_BASE = {
   httpOnly: true,
   secure: isProduction(),
-  sameSite: "lax" as const,
+  // In production: API (Railway) and frontend (Vercel) are on different domains.
+  // "none" allows cookies to be sent on cross-origin requests (e.g. tRPC POST mutations).
+  // "none" requires secure:true (HTTPS), so we fall back to "lax" in development.
+  sameSite: isProduction() ? ("none" as const) : ("lax" as const),
   path: "/",
 };
 
