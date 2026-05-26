@@ -2,12 +2,19 @@ import "dotenv/config";
 import http from "node:http";
 import { logger } from "@repo/logger";
 import { app as expressApplication } from "./server";
-import { pool } from "@repo/database";
+import { pool, db } from "@repo/database";
+import { migrate } from "drizzle-orm/node-postgres/migrator";
+import path from "node:path";
 
 import { env } from "./env";
 
 async function init() {
   try {
+    logger.info("Running database migrations...");
+    const migrationsFolder = path.join(__dirname, "../../../packages/database/drizzle");
+    await migrate(db, { migrationsFolder });
+    logger.info("Database migrations completed successfully.");
+
     const server = http.createServer(expressApplication);
     const PORT: number = env.PORT ? +env.PORT : 8000;
     server.listen(PORT, () => {
