@@ -53,6 +53,7 @@ app.use(
 
 // ─── CORS ─────────────────────────────────────────────────────────────────────
 const allowedOrigins = env.ALLOWED_ORIGINS.split(",").map((o) => o.trim());
+logger.info(`CORS allowed origins: ${allowedOrigins.join(", ")}`);
 app.use(
   cors({
     origin: (origin, callback) => {
@@ -60,6 +61,7 @@ app.use(
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
+        logger.warn(`CORS rejected origin: ${origin}`);
         callback(new Error(`Origin ${origin} not allowed by CORS`));
       }
     },
@@ -151,6 +153,7 @@ app.use((req, res, next) => {
       "responses.submit",
       "auth.register",
       "auth.login",
+      "auth.me",
       "auth.sendVerification",
       "auth.verifyEmail",
       "auth.logout",

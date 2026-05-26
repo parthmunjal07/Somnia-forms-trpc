@@ -25,6 +25,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
           clearUser();
         }
       } catch (err) {
+        console.error("[AuthGuard] auth.me failed:", err);
         clearUser();
       } finally {
         setLoading(false);
