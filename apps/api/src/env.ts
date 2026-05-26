@@ -12,6 +12,7 @@ const envSchema = z.object({
   CSRF_SECRET: z.string().min(1, "CSRF_SECRET is required"),
   UPSTASH_REDIS_REST_URL: z.string().optional(),
   UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
+  REDIS_URL: z.string().optional(),
   GOOGLE_OAUTH_CLIENT_ID: z.string().optional(),
   GOOGLE_OAUTH_CLIENT_SECRET: z.string().optional(),
   FRONTEND_URL: z.string().default("http://localhost:3000"),
