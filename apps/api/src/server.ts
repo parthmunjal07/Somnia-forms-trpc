@@ -229,10 +229,6 @@ app.get("/health", (_req, res) => {
   return res.json({ message: "Somnia server is healthy", healthy: true });
 });
 
-app.get("/favicon.ico", (_req, res) => {
-  res.status(204).end();
-});
-
 logger.debug(`openapi.json: ${env.BASE_URL}/openapi.json`);
 app.get("/openapi.json", (_req, res) => {
   return res.json(openApiDocument);
