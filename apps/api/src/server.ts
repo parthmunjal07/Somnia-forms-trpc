@@ -200,17 +200,22 @@ app.get(
     passport.authenticate("google", { session: false, failureRedirect: `${env.FRONTEND_URL}/login?error=oauth_failed` })(req, res, next);
   },
   (req, res) => {
-    const user = req.user as SelectUser;
-    if (!user) {
-      return res.redirect(`${env.FRONTEND_URL}/login?error=oauth_failed`);
-    }
+    try {
+      const user = req.user as SelectUser;
+      if (!user) {
+        return res.redirect(`${env.FRONTEND_URL}/login?error=oauth_failed`);
+      }
 
-    const tokens = generateTokens(user);
-    // Cast res to any to avoid type issues with express vs minimal CookieResponse
-    setTokenCookies(res as any, tokens);
-    
-    // Redirect to frontend dashboard or home
-    res.redirect(`${env.FRONTEND_URL}/dashboard`);
+      const tokens = generateTokens(user);
+      // Cast res to any to avoid type issues with express vs minimal CookieResponse
+      setTokenCookies(res as any, tokens);
+      
+      // Redirect to frontend dashboard or home
+      res.redirect(`${env.FRONTEND_URL}/dashboard`);
+    } catch (error) {
+      logger.error("Google OAuth callback error", error);
+      res.redirect(`${env.FRONTEND_URL}/login?error=oauth_server_error`);
+    }
   }
 );
 
@@ -253,5 +258,15 @@ app.use(
     createContext: adaptContext,
   })
 );
+
+// ─── Global Error Handler ─────────────────────────────────────────────────────
+// Must be the last middleware — catches any unhandled errors from route handlers
+import type { Request, Response, NextFunction } from "express";
+app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
+  logger.error("Unhandled server error", err);
+  if (!res.headersSent) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
 
 export default app;
