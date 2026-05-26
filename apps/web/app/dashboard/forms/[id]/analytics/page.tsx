@@ -687,14 +687,58 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
                                               renderedVal = String(val);
                                             }
 
+                                            const isSelectOrRating = ["single_select", "multi_select", "rating"].includes(field.type);
+                                            const dist = distributions?.[field.id];
+
                                             return (
-                                              <div key={field.id} className="space-y-1">
+                                              <div key={field.id} className="space-y-1.5">
                                                 <span className="text-[9px] text-[#8BA3BF]/80 uppercase tracking-wider block">
                                                   {field.label} {field.required && <span className="text-[#E8B455]">*</span>}
                                                 </span>
                                                 <p className="text-xs text-[#EEF3F8] bg-[#0A0A0F] border border-[rgba(200,216,232,0.1)]/60 p-2.5 rounded font-mono whitespace-pre-wrap leading-relaxed">
                                                   {renderedVal}
                                                 </p>
+                                                {isSelectOrRating && dist && dist.length > 0 && (
+                                                  <div className="mt-2 p-3 bg-[#0A0A0F]/60 border border-[rgba(200,216,232,0.05)] rounded space-y-2">
+                                                    <span className="text-[8px] text-[#8BA3BF]/60 uppercase tracking-widest block font-bold">
+                                                      Distribution Wave (Highlighted is user answer)
+                                                    </span>
+                                                    <div className="space-y-2">
+                                                      {(() => {
+                                                        const total = dist.reduce((sum: number, d: any) => sum + d.count, 0);
+                                                        return dist.map((option: any) => {
+                                                          const percent = total > 0 ? Math.round((option.count / total) * 100) : 0;
+                                                          const isChosen = Array.isArray(val)
+                                                            ? val.map(String).includes(String(option.value))
+                                                            : val !== undefined && val !== null && val !== "" && String(val) === String(option.value);
+
+                                                          return (
+                                                            <div key={option.value} className="space-y-1">
+                                                              <div className="flex justify-between items-center text-[9px]">
+                                                                <span className={`truncate max-w-[70%] font-mono ${isChosen ? "text-[#C9933A] font-bold" : "text-[#8BA3BF]/80"}`}>
+                                                                  {option.value} {isChosen && "◀"}
+                                                                </span>
+                                                                <span className={`font-semibold ${isChosen ? "text-[#C9933A]" : "text-[#8BA3BF]/60"}`}>
+                                                                  {option.count} ({percent}%)
+                                                                </span>
+                                                              </div>
+                                                              <div className="w-full bg-[#0A0A0F] h-1.5 rounded overflow-hidden p-[1px] border border-[rgba(200,216,232,0.05)]">
+                                                                <div
+                                                                  style={{ width: `${percent}%` }}
+                                                                  className={`h-full rounded transition-all duration-500 ${
+                                                                    isChosen
+                                                                      ? "bg-[#C9933A] shadow-[0_0_8px_rgba(201,147,58,0.4)]"
+                                                                      : "bg-stone-800"
+                                                                  }`}
+                                                                />
+                                                              </div>
+                                                            </div>
+                                                          );
+                                                        });
+                                                      })()}
+                                                    </div>
+                                                  </div>
+                                                )}
                                               </div>
                                             );
                                           })

@@ -10,6 +10,8 @@ export interface FieldDefinition {
   placeholder: string | null;
   options: any | null; // string[] for select, number/max info for rating
   validationRules: any | null;
+  pageIndex?: number;
+  conditionalLogic?: any;
 }
 
 interface FieldRendererProps {

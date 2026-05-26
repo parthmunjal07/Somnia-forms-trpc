@@ -177,4 +177,14 @@ export const formsRouter = router({
     .mutation(async ({ input, ctx }: { input: any, ctx: any }) => {
       return formsService.clone(input.id, ctx.user.id);
     }),
+
+  createFromTemplate: protectedProcedure
+    .input(z.object({
+      templateKey: z.string(),
+      title: z.string().min(1).max(100),
+      slug: z.string().min(1).max(100).regex(/^[a-z0-9-]+$/),
+    }))
+    .mutation(async ({ input, ctx }: { input: any, ctx: any }) => {
+      return formsService.createFromTemplate(ctx.user.id, input.templateKey, input.title, input.slug);
+    }),
 });

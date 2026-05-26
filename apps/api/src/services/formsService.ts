@@ -7,6 +7,7 @@ import { can } from "../rbac";
 import { paginationInput } from "@repo/trpc/pagination";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
+import { FORM_TEMPLATES } from "@repo/schemas";
 
 export async function getUserFormRole(formId: string, userId: string) {
   const [form] = await db
@@ -411,6 +412,31 @@ export class FormsService {
 
       return newForm;
     });
+  }
+
+  async createFromTemplate(userId: string, templateKey: string, title: string, slug: string) {
+    const templateFields = FORM_TEMPLATES[templateKey as keyof typeof FORM_TEMPLATES];
+    if (!templateFields) {
+      throw new TRPCError({ code: "NOT_FOUND", message: "Template not found" });
+    }
+
+    const form = await this.create(userId, title, slug, "unlisted");
+
+    if (templateFields.length > 0) {
+      await db.insert(fieldsTable).values(
+        templateFields.map((f, index) => ({
+          formId: form.id,
+          label: f.label,
+          type: f.type as any,
+          required: f.required,
+          options: f.options as any,
+          order: index,
+          pageIndex: 0,
+        }))
+      );
+    }
+
+    return form;
   }
 }
 

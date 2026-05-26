@@ -6,6 +6,7 @@ import {
   text,
   pgEnum,
   index,
+  boolean,
 } from "drizzle-orm/pg-core";
 
 export const roleEnum = pgEnum("role_type", [
@@ -39,6 +40,7 @@ export const usersTable = pgTable("users", {
 
   subscriptionTier: subscriptionTierEnum("subscription_tier").default("free").notNull(),
 
+  isSuspended: boolean("is_suspended").default(false).notNull(),
 
   profileImageUrl: text("profile_image_url"),
 

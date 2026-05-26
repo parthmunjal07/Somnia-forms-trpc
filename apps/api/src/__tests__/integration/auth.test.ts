@@ -23,40 +23,35 @@ describe("Integration: Auth Flow", () => {
 
   it("should register a new user", async () => {
     const res = await request(app)
-      .post("/trpc/auth.register")
+      .post("/api/auth/register")
       .send({
-        "0": {
-          json: {
-            email: TEST_EMAIL,
-            password: TEST_PASSWORD,
-            name: "Auth Flow Test",
-          }
-        }
+        email: TEST_EMAIL,
+        password: TEST_PASSWORD,
+        fullName: "Auth Flow Test",
       });
 
+    if (res.status !== 200) {
+      console.log("REGISTER RESPONSE:", JSON.stringify(res.body, null, 2));
+    }
     expect(res.status).toBe(200);
-    expect(res.body[0].result.data).toHaveProperty("message");
-    // Registration might send verification email or just return success
+    expect(res.body).toHaveProperty("message");
   });
 
-  // Note: Skipping 'verify email' as it requires the token generated in the DB.
-  // Assuming the user is auto-verified for this test, or we update the DB manually.
   it("should mark user as verified", async () => {
     await db.update(usersTable).set({ emailVerifiedAt: new Date() }).where(eq(usersTable.email, TEST_EMAIL));
   });
 
   it("should login and receive httpOnly cookies", async () => {
     const res = await request(app)
-      .post("/trpc/auth.login")
+      .post("/api/auth/login")
       .send({
-        "0": {
-          json: {
-            email: TEST_EMAIL,
-            password: TEST_PASSWORD,
-          }
-        }
+        email: TEST_EMAIL,
+        password: TEST_PASSWORD,
       });
 
+    if (res.status !== 200) {
+      console.log("LOGIN RESPONSE:", JSON.stringify(res.body, null, 2));
+    }
     expect(res.status).toBe(200);
     
     // Check cookies
@@ -73,24 +68,31 @@ describe("Integration: Auth Flow", () => {
     loginCookie = cookies.map(c => c.split(";")[0]).join("; ");
     
     // Verify local storage is not used by checking payload
-    expect(res.body[0].result.data).not.toHaveProperty("accessToken");
-    expect(res.body[0].result.data).not.toHaveProperty("refreshToken");
+    expect(res.body).not.toHaveProperty("accessToken");
+    expect(res.body).not.toHaveProperty("refreshToken");
+    expect(res.body).toHaveProperty("user");
   });
 
   it("should fetch /me using the cookie", async () => {
     const res = await request(app)
-      .get("/trpc/auth.me")
-      .set("Cookie", loginCookie);
+      .post("/api/auth/me")
+      .set("Content-Type", "application/json")
+      .set("Cookie", loginCookie)
+      .send();
 
+    if (res.status !== 200) {
+      console.log("ME RESPONSE:", JSON.stringify(res.body, null, 2));
+    }
     expect(res.status).toBe(200);
-    expect(res.body[0].result.data).toHaveProperty("email", TEST_EMAIL);
+    expect(res.body.user).toHaveProperty("email", TEST_EMAIL);
   });
 
   it("should logout and clear cookies", async () => {
     const res = await request(app)
-      .post("/trpc/auth.logout")
-      .send({ "0": { json: {} } })
-      .set("Cookie", loginCookie);
+      .post("/api/auth/logout")
+      .set("Content-Type", "application/json")
+      .set("Cookie", loginCookie)
+      .send();
 
     expect(res.status).toBe(200);
     
@@ -98,6 +100,6 @@ describe("Integration: Auth Flow", () => {
     expect(cookies.length).toBeGreaterThan(0);
     // Access token should be cleared
     const accessCookie = cookies.find(c => c.startsWith("access_token="));
-    expect(accessCookie).toContain("Max-Age=0");
+    expect(accessCookie).toContain("Expires=Thu, 01 Jan 1970 00:00:00 GMT");
   });
 });

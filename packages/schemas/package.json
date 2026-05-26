@@ -2,6 +2,7 @@
   "name": "@repo/schemas",
   "version": "1.0.0",
   "private": true,
+  "main": "./index.ts",
   "devDependencies": {
     "@repo/config": "workspace:*",
     "@repo/typescript-config": "workspace:*",

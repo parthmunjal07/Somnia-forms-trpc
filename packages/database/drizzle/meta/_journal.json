@@ -22,6 +22,13 @@
       "when": 1779727702021,
       "tag": "0002_bright_wendell_rand",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1779776224031,
+      "tag": "0003_rapid_ghost_rider",
+      "breakpoints": true
     }
   ]
 }

@@ -285,10 +285,11 @@ export default function Home() {
   const [copied, setCopied] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [introComplete, setIntroComplete] = useState(false);
-  const [isDestabilizing, setIsDestabilizing] = useState(false);
+  const [isInactive, setIsInactive] = useState(false);
   const [isInceptionMode, setIsInceptionMode] = useState(false);
   const [totemClicks, setTotemClicks] = useState<number[]>([]);
   const [isTotemStopped, setIsTotemStopped] = useState(false);
+  const inactivityAudioRef = useRef<HTMLAudioElement | null>(null);
 
   const handleTotemClick = () => {
     const now = Date.now();
@@ -336,25 +337,65 @@ export default function Home() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Idle Easter Egg
+  // Idle Background & Audio
   useEffect(() => {
-    let idleTimer: NodeJS.Timeout;
-    let resetTimer: NodeJS.Timeout;
+    const audio = new Audio("/wake_up_to_reality.mp3");
+    audio.loop = false;
+    audio.preload = "auto";
+    inactivityAudioRef.current = audio;
+
+    let inactivityTimeout: NodeJS.Timeout;
+    let isAudioUnlocked = false;
+
+    const unlockAudio = () => {
+      if (isAudioUnlocked) return;
+      if (inactivityAudioRef.current) {
+        inactivityAudioRef.current.play()
+          .then(() => {
+            if (inactivityAudioRef.current) {
+              inactivityAudioRef.current.pause();
+              inactivityAudioRef.current.currentTime = 0;
+            }
+            isAudioUnlocked = true;
+            removeUnlockListeners();
+          })
+          .catch((err) => {
+            console.warn("Audio interaction play rejected:", err);
+          });
+      }
+    };
+
+    const removeUnlockListeners = () => {
+      window.removeEventListener("click", unlockAudio);
+      window.removeEventListener("keydown", unlockAudio);
+      window.removeEventListener("mousedown", unlockAudio);
+      window.removeEventListener("pointerdown", unlockAudio);
+      window.removeEventListener("touchstart", unlockAudio);
+    };
+
+    window.addEventListener("click", unlockAudio);
+    window.addEventListener("keydown", unlockAudio);
+    window.addEventListener("mousedown", unlockAudio);
+    window.addEventListener("pointerdown", unlockAudio);
+    window.addEventListener("touchstart", unlockAudio);
 
     const resetIdle = () => {
-      setIsDestabilizing(false);
-      clearTimeout(idleTimer);
-      clearTimeout(resetTimer);
+      setIsInactive(false);
+      if (inactivityAudioRef.current) {
+        inactivityAudioRef.current.pause();
+        inactivityAudioRef.current.currentTime = 0;
+      }
+      
+      clearTimeout(inactivityTimeout);
 
       // Start 30s idle timer
-      idleTimer = setTimeout(() => {
-        setIsDestabilizing(true);
-        // Reset the easter egg after 5 seconds of destabilization
-        resetTimer = setTimeout(() => {
-          setIsDestabilizing(false);
-          // Restart idle tracking
-          resetIdle();
-        }, 5000);
+      inactivityTimeout = setTimeout(() => {
+        setIsInactive(true);
+        if (inactivityAudioRef.current) {
+          inactivityAudioRef.current.play().catch((err) => {
+            console.warn("Audio play blocked by browser policy:", err);
+          });
+        }
       }, 30000);
     };
 
@@ -362,6 +403,7 @@ export default function Home() {
     window.addEventListener("keydown", resetIdle);
     window.addEventListener("scroll", resetIdle);
     window.addEventListener("click", resetIdle);
+    window.addEventListener("touchstart", resetIdle);
 
     resetIdle();
 
@@ -370,8 +412,12 @@ export default function Home() {
       window.removeEventListener("keydown", resetIdle);
       window.removeEventListener("scroll", resetIdle);
       window.removeEventListener("click", resetIdle);
-      clearTimeout(idleTimer);
-      clearTimeout(resetTimer);
+      window.removeEventListener("touchstart", resetIdle);
+      removeUnlockListeners();
+      clearTimeout(inactivityTimeout);
+      if (inactivityAudioRef.current) {
+        inactivityAudioRef.current.pause();
+      }
     };
   }, []);
 
@@ -389,17 +435,21 @@ export default function Home() {
 
   return (
     <main 
-      className="relative bg-[#0A0A0F] text-[#C8D8E8] font-mono overflow-x-hidden min-h-screen selection:bg-[#C9933A]/20 selection:text-[#E8B455] transition-transform duration-1000 ease-in-out"
-      style={{ transform: isInceptionMode ? "rotate(180deg)" : "none" }}
+      className="relative text-[#C8D8E8] font-mono overflow-x-hidden min-h-screen selection:bg-[#C9933A]/20 selection:text-[#E8B455]"
+      style={{ 
+        transform: isInceptionMode ? "rotate(180deg)" : "none",
+        backgroundColor: isInactive ? "#0A361A" : "#0A0A0F",
+        transition: "background-color 1.5s ease, transform 1s ease-in-out"
+      }}
     >
-      <FogAnimation isDestabilizing={isDestabilizing} />
+      <FogAnimation isDestabilizing={isInactive} />
 
       {/* Destabilization Message */}
       <div
-        className={`fixed bottom-10 left-1/2 -translate-x-1/2 z-50 text-red-500/90 tracking-[0.3em] uppercase text-[11px] font-bold pointer-events-none transition-opacity duration-1000 ${isDestabilizing ? 'opacity-100' : 'opacity-0'}`}
-        style={{ textShadow: "0 0 10px rgba(220,20,20,0.8)" }}
+        className={`fixed bottom-10 left-1/2 -translate-x-1/2 z-50 tracking-[0.3em] uppercase text-[11px] font-bold pointer-events-none transition-opacity duration-1000 ${isInactive ? 'opacity-100' : 'opacity-0'}`}
+        style={{ color: "#4AFF9E", textShadow: "0 0 10px rgba(74,255,158,0.5)" }}
       >
-        The dream is destabilizing.
+        Wake up to reality.
       </div>
 
       {!introComplete && (

@@ -108,6 +108,8 @@ export const fieldsTable = pgTable(
     placeholder: text("placeholder"),
     options: jsonb("options"), // array of strings for dropdowns/checkboxes
     validationRules: jsonb("validation_rules"),
+    pageIndex: integer("page_index").default(0).notNull(),
+    conditionalLogic: jsonb("conditional_logic"),
     order: integer("order").notNull(),
     createdAt: timestamp("created_at").defaultNow(),
     updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),

@@ -8,6 +8,204 @@ export const validationRulesSchema = z.object({
   pattern: z.string().optional(),
 }).optional();
 
+export const conditionalLogicSchema = z.object({
+  rules: z.array(z.object({
+    fieldId: z.string().uuid("Invalid target field ID"),
+    operator: z.enum(["equals", "not_equals"]),
+    value: z.string(),
+    action: z.enum(["show", "hide"]),
+  })).optional()
+}).nullable().optional();
+
+export const FORM_TEMPLATES = {
+  feedback: [
+    {
+      label: "Extraction Success Rating",
+      type: "rating",
+      required: true,
+      options: null,
+    },
+    {
+      label: "Primary Subject Subconscious State",
+      type: "single_select",
+      required: true,
+      options: ["Stable", "Volatile", "Hostile", "Fragmented"],
+    },
+    {
+      label: "Operational Anomalies Encountered",
+      type: "long_text",
+      required: false,
+      options: null,
+    },
+    {
+      label: "Require follow-up integration?",
+      type: "checkbox",
+      required: false,
+      options: null,
+    },
+  ],
+  job_application: [
+    {
+      label: "Operative Alias / Full Name",
+      type: "short_text",
+      required: true,
+      options: null,
+    },
+    {
+      label: "Secure Comm Channel (Email)",
+      type: "email",
+      required: true,
+      options: null,
+    },
+    {
+      label: "Specialization Tier",
+      type: "single_select",
+      required: true,
+      options: ["Architect", "Forger", "Chemist", "Point Man", "Extractor"],
+    },
+    {
+      label: "Years Active in the Field",
+      type: "number",
+      required: true,
+      options: null,
+    },
+    {
+      label: "Available for Immediate Deployment (Date)",
+      type: "date",
+      required: true,
+      options: null,
+    },
+    {
+      label: "Briefing: Most Complex Extraction to Date",
+      type: "long_text",
+      required: true,
+      options: null,
+    },
+  ],
+  event_registration: [
+    {
+      label: "Attendee Identity Code (Name)",
+      type: "short_text",
+      required: true,
+      options: null,
+    },
+    {
+      label: "Transmission Address (Email)",
+      type: "email",
+      required: true,
+      options: null,
+    },
+    {
+      label: "Requested Arsenal / Equipment",
+      type: "multi_select",
+      required: false,
+      options: ["Suppressed Sidearm", "Sedative Kit", "Totem Calibration Tool", "Architect Grid Specs"],
+    },
+    {
+      label: "Agree to Non-Disclosure Directive",
+      type: "checkbox",
+      required: true,
+      options: null,
+    },
+  ],
+  security: [
+    {
+      label: "Subject Alias/Identifier",
+      type: "short_text",
+      required: true,
+      options: null,
+    },
+    {
+      label: "Hostile Projection Activity Level",
+      type: "single_select",
+      required: true,
+      options: ["None", "Low", "Medium", "High", "Critical"],
+    },
+    {
+      label: "Totem Calibration Confirmed?",
+      type: "checkbox",
+      required: true,
+      options: null,
+    },
+    {
+      label: "Describe Your Totem's Physical Behavior",
+      type: "long_text",
+      required: true,
+      options: null,
+    },
+    {
+      label: "Last Known Active Dream Level",
+      type: "number",
+      required: true,
+      options: null,
+    },
+  ],
+  research: [
+    {
+      label: "Compound Batch ID",
+      type: "short_text",
+      required: true,
+      options: null,
+    },
+    {
+      label: "Intravenous Dosage Level (mg)",
+      type: "number",
+      required: true,
+      options: null,
+    },
+    {
+      label: "Dream Duration (Hours)",
+      type: "number",
+      required: true,
+      options: null,
+    },
+    {
+      label: "Did Subject Experience Limbo?",
+      type: "checkbox",
+      required: true,
+      options: null,
+    },
+    {
+      label: "Subject Somatic Stability Score",
+      type: "rating",
+      required: true,
+      options: null,
+    },
+  ],
+  lead_gen: [
+    {
+      label: "Client Organization Alias",
+      type: "short_text",
+      required: true,
+      options: null,
+    },
+    {
+      label: "Project Deadline",
+      type: "date",
+      required: true,
+      options: null,
+    },
+    {
+      label: "Requested Dream Depth Layers",
+      type: "number",
+      required: true,
+      options: null,
+    },
+    {
+      label: "Architectural Style Reference",
+      type: "single_select",
+      required: true,
+      options: ["Classical", "Modernist", "Brutalist", "Paradoxical/Escherian"],
+    },
+    {
+      label: "Space Constraints / Grid Bounds",
+      type: "long_text",
+      required: false,
+      options: null,
+    },
+  ],
+} as const;
+
 export const createFormSchema = z.object({
   title: z.string().min(1, "Title is required").max(255),
   slug: z
@@ -58,6 +256,8 @@ export const addFieldSchema = z.object({
   placeholder: z.string().optional(),
   options: z.array(z.string()).optional(),
   validationRules: validationRulesSchema,
+  pageIndex: z.number().int().min(0).optional(),
+  conditionalLogic: conditionalLogicSchema,
   order: z.number().int(),
 });
 
@@ -81,6 +281,8 @@ export const updateFieldSchema = z.object({
   placeholder: z.string().optional(),
   options: z.array(z.string()).optional(),
   validationRules: validationRulesSchema,
+  pageIndex: z.number().int().min(0).optional(),
+  conditionalLogic: conditionalLogicSchema,
   order: z.number().int().optional(),
 });
 

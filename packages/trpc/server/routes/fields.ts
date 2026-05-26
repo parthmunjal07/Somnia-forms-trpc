@@ -78,6 +78,8 @@ export const fieldsRouter = router({
       required: z.boolean().default(false),
       options: z.any().optional(),
       validationRules: z.any().optional(),
+      pageIndex: z.number().int().min(0).optional(),
+      conditionalLogic: z.any().optional(),
       order: z.number().int().min(0),
     }))
     .output(z.any())
@@ -111,6 +113,8 @@ export const fieldsRouter = router({
       required: z.boolean().optional(),
       options: z.any().optional(),
       validationRules: z.any().optional(),
+      pageIndex: z.number().int().min(0).optional(),
+      conditionalLogic: z.any().optional(),
       order: z.number().int().min(0).optional(),
     }))
     .output(z.any())

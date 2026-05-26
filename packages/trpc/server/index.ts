@@ -7,6 +7,7 @@ import { fieldsRouter } from "./routes/fields";
 import { responsesRouter } from "./routes/responses";
 import { analyticsRouter } from "./routes/analytics";
 import { collaboratorsRouter } from "./routes/collaborators";
+import { adminRouter } from "./routes/admin";
 
 export const serverRouter = router({
   health: healthRouter,
@@ -16,6 +17,7 @@ export const serverRouter = router({
   responses: responsesRouter,
   analytics: analyticsRouter,
   collaborators: collaboratorsRouter,
+  admin: adminRouter,
 });
 
 export { createContext } from "./context";

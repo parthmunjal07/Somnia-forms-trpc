@@ -8,6 +8,170 @@ import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Totem } from "./Totem";
 import { ProgressBar } from "./ProgressBar";
 import { FieldRenderer, FieldDefinition } from "./FieldRenderer";
+import { z } from "zod";
+
+export const isFieldVisible = (field: FieldDefinition, currentAnswers: Record<string, any>): boolean => {
+  const logic = field.conditionalLogic as { rules?: Array<{ fieldId: string; operator: "equals" | "not_equals"; value: string; action: "show" | "hide" }> } | null;
+  if (!logic || !logic.rules || logic.rules.length === 0) {
+    return true;
+  }
+
+  let shouldShow = true;
+  const hasShowRule = logic.rules.some((r) => r.action === "show");
+  if (hasShowRule) {
+    shouldShow = false;
+  }
+
+  for (const rule of logic.rules) {
+    const targetVal = currentAnswers[rule.fieldId];
+    const targetValStr = targetVal !== undefined && targetVal !== null ? String(targetVal) : "";
+    const ruleValStr = String(rule.value);
+
+    const matches = rule.operator === "equals"
+      ? targetValStr === ruleValStr
+      : targetValStr !== ruleValStr;
+
+    if (rule.action === "show" && matches) {
+      shouldShow = true;
+    }
+    if (rule.action === "hide" && matches) {
+      shouldShow = false;
+      break;
+    }
+  }
+
+  return shouldShow;
+};
+
+const getLayerName = (idx: number): string => {
+  const names = [
+    "Reality (Layer 1)",
+    "The Hotel (Layer 2)",
+    "Snow Fortress (Layer 3)",
+    "Limbo (Layer 4)",
+  ];
+  return names[idx] || `Limbo Deep (Layer ${idx + 1})`;
+};
+
+function buildZodSchemaForFields(fieldsToValidate: FieldDefinition[], currentAnswers: Record<string, any>) {
+  const shape: Record<string, z.ZodTypeAny> = {};
+
+  fieldsToValidate.forEach((field) => {
+    if (!isFieldVisible(field, currentAnswers)) return;
+
+    let fieldSchema: z.ZodTypeAny;
+
+    switch (field.type) {
+      case "short_text":
+      case "long_text": {
+        let stringSchema = z.string();
+        const rules = field.validationRules as Record<string, any> | null;
+        if (rules) {
+          if (typeof rules.minLength === "number") stringSchema = stringSchema.min(rules.minLength, `Minimum length is ${rules.minLength}`);
+          if (typeof rules.maxLength === "number") stringSchema = stringSchema.max(rules.maxLength, `Maximum length is ${rules.maxLength}`);
+          if (typeof rules.pattern === "string" && rules.pattern) {
+            try {
+              stringSchema = stringSchema.regex(new RegExp(rules.pattern), "Format is invalid");
+            } catch (e) {}
+          }
+        }
+        if (field.required) {
+          stringSchema = stringSchema.min(1, "This parameter is required to stabilize the layer.");
+        }
+        fieldSchema = stringSchema;
+        break;
+      }
+
+      case "email": {
+        let emailSchema = z.string();
+        const rules = field.validationRules as Record<string, any> | null;
+        if (rules) {
+          if (typeof rules.minLength === "number") emailSchema = emailSchema.min(rules.minLength, `Minimum length is ${rules.minLength}`);
+          if (typeof rules.maxLength === "number") emailSchema = emailSchema.max(rules.maxLength, `Maximum length is ${rules.maxLength}`);
+          if (typeof rules.pattern === "string" && rules.pattern) {
+            try {
+              emailSchema = emailSchema.regex(new RegExp(rules.pattern), "Format is invalid");
+            } catch (e) {}
+          }
+        }
+        emailSchema = emailSchema.email("Invalid email coordinates.");
+        if (field.required) {
+          emailSchema = emailSchema.min(1, "This parameter is required to stabilize the layer.");
+        }
+        fieldSchema = emailSchema;
+        break;
+      }
+
+      case "number": {
+        let numSchema = z.coerce.number({ message: "Value must be a valid numeric coefficient." });
+        const rules = field.validationRules as Record<string, any> | null;
+        if (rules) {
+          if (typeof rules.min === "number") numSchema = numSchema.min(rules.min, `Coefficient must be at least ${rules.min}.`);
+          if (typeof rules.max === "number") numSchema = numSchema.max(rules.max, `Coefficient must be at most ${rules.max}.`);
+        }
+        fieldSchema = numSchema;
+        break;
+      }
+
+      case "single_select": {
+        let selectSchema = z.string({ message: "This parameter is required to stabilize the layer." });
+        if (field.required) {
+          selectSchema = selectSchema.min(1, "This parameter is required to stabilize the layer.");
+        }
+        fieldSchema = selectSchema;
+        break;
+      }
+
+      case "multi_select": {
+        let selectSchema = z.array(z.string());
+        if (field.required) {
+          selectSchema = selectSchema.min(1, "At least one selection is required.");
+        }
+        fieldSchema = selectSchema;
+        break;
+      }
+
+      case "rating": {
+        let maxVal = 5;
+        const opts = field.options;
+        if (typeof opts === "number") {
+          maxVal = opts;
+        } else if (Array.isArray(opts) && opts.length > 0) {
+          maxVal = Number(opts[0]) || 5;
+        } else if (opts && typeof opts === "object" && !Array.isArray(opts)) {
+          maxVal = (opts as Record<string, unknown>).max as number || 5;
+        }
+        fieldSchema = z.coerce.number().min(1, "Rating must be at least 1.").max(maxVal, `Rating must be at most ${maxVal}.`);
+        break;
+      }
+
+      case "date": {
+        let dateSchema = z.string();
+        if (field.required) {
+          dateSchema = dateSchema.min(1, "This parameter is required to stabilize the layer.");
+        }
+        fieldSchema = dateSchema;
+        break;
+      }
+
+      case "checkbox": {
+        let checkSchema = z.boolean();
+        if (field.required) {
+          checkSchema = checkSchema.refine((val) => val === true, "You must confirm this parameter.");
+        }
+        fieldSchema = checkSchema;
+        break;
+      }
+
+      default:
+        fieldSchema = z.any();
+    }
+
+    shape[field.id] = field.required ? fieldSchema : fieldSchema.optional().nullable().or(z.literal("")).or(z.undefined());
+  });
+
+  return z.object(shape);
+}
 
 interface FormRunnerProps {
   form: {
@@ -31,23 +195,28 @@ export function FormRunner({ form, fields, passcode, isPreview, onSimulateSubmit
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const layers = useMemo(() => {
-    const result: { title: string | null; fields: FieldDefinition[] }[] = [];
-    let currentChunk: FieldDefinition[] = [];
-    let currentTitle: string | null = null;
-    
+    const groups: Record<number, FieldDefinition[]> = {};
     fields.forEach((field) => {
-      if (field.type === "layer_break") {
-        result.push({ title: currentTitle, fields: currentChunk });
-        currentChunk = [];
-        currentTitle = field.label;
-      } else {
-        currentChunk.push(field);
+      if (field.type === "layer_break") return;
+      const pIdx = field.pageIndex ?? 0;
+      if (!groups[pIdx]) {
+        groups[pIdx] = [];
       }
+      groups[pIdx].push(field);
     });
-    
-    // Push the last chunk
-    result.push({ title: currentTitle, fields: currentChunk });
-    return result;
+
+    const sortedPageIndices = Object.keys(groups)
+      .map(Number)
+      .sort((a, b) => a - b);
+
+    if (sortedPageIndices.length === 0) {
+      return [{ title: "Reality (Layer 1)", fields: [] }];
+    }
+
+    return sortedPageIndices.map((idx) => ({
+      title: getLayerName(idx),
+      fields: groups[idx] || [],
+    }));
   }, [fields]);
 
   const variants = {
@@ -83,94 +252,29 @@ export function FormRunner({ form, fields, passcode, isPreview, onSimulateSubmit
 
   const submitMutation = trpc.responses.submit.useMutation();
 
+
+
   const currentLayer = layers[currentLayerIndex];
 
-  // Helper validation matching backend
-  const validateField = (field: FieldDefinition, val: any): string | null => {
-    if (field.type === "layer_break") return null;
-    const rules = field.validationRules as Record<string, any> | null;
-    const isRequired = field.required;
-
-    // Check required
-    if (isRequired) {
-      if (val === undefined || val === null) {
-        return "This parameter is required to stabilize the layer.";
-      }
-      if (typeof val === "string" && val.trim() === "") {
-        return "This parameter is required to stabilize the layer.";
-      }
-      if (Array.isArray(val) && val.length === 0) {
-        return "At least one selection is required.";
-      }
-      if (field.type === "checkbox" && val !== true) {
-        return "You must confirm this parameter.";
-      }
-    }
-
-    // If there's no value and not required, it's valid
-    if (val === undefined || val === null || (typeof val === "string" && val.trim() === "")) {
-      return null;
-    }
-
-    // Validate email pattern
-    if (field.type === "email") {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(String(val))) {
-        return "Invalid email coordinates.";
-      }
-    }
-
-    // Custom rules (minLength, maxLength, min, max, pattern)
-    if (rules) {
-      if (field.type === "short_text" || field.type === "long_text" || field.type === "email") {
-        const strVal = String(val);
-        if (typeof rules.minLength === "number" && strVal.length < rules.minLength) {
-          return `Parameter requires minimum of ${rules.minLength} characters.`;
-        }
-        if (typeof rules.maxLength === "number" && strVal.length > rules.maxLength) {
-          return `Parameter maximum boundary is ${rules.maxLength} characters.`;
-        }
-        if (typeof rules.pattern === "string" && rules.pattern !== "") {
-          try {
-            const regex = new RegExp(rules.pattern);
-            if (!regex.test(strVal)) {
-              return "Coordinates format invalid.";
-            }
-          } catch (e) {
-            // invalid regex
-          }
-        }
-      }
-
-      if (field.type === "number") {
-        const numVal = Number(val);
-        if (isNaN(numVal)) {
-          return "Value must be a valid numeric coefficient.";
-        }
-        if (typeof rules.min === "number" && numVal < rules.min) {
-          return `Coefficient must be at least ${rules.min}.`;
-        }
-        if (typeof rules.max === "number" && numVal > rules.max) {
-          return `Coefficient must be at most ${rules.max}.`;
-        }
-      }
-    }
-
-    return null;
-  };
-
   const handleValueChange = (field: FieldDefinition, val: any) => {
-    setAnswers((prev) => ({ ...prev, [field.id]: val }));
+    const newAnswers = { ...answers, [field.id]: val };
+    setAnswers(newAnswers);
     
     // Clear validation error dynamically if it becomes valid
     if (errors[field.id]) {
-      const err = validateField(field, val);
+      const pageSchema = buildZodSchemaForFields([field], newAnswers);
+      const parseResult = pageSchema.safeParse(newAnswers);
       setErrors((prev) => {
         const updated = { ...prev };
-        if (!err) {
+        if (parseResult.success) {
           delete updated[field.id];
         } else {
-          updated[field.id] = err;
+          const err = parseResult.error.issues.find((e: any) => e.path[0] === field.id);
+          if (err) {
+            updated[field.id] = err.message;
+          } else {
+            delete updated[field.id];
+          }
         }
         return updated;
       });
@@ -180,25 +284,37 @@ export function FormRunner({ form, fields, passcode, isPreview, onSimulateSubmit
   const handleNext = () => {
     if (!currentLayer) return;
 
-    let layerIsValid = true;
-    const newErrors = { ...errors };
+    // Filter visible fields on this layer
+    const visibleFields = currentLayer.fields.filter(f => isFieldVisible(f, answers));
+    
+    const pageSchema = buildZodSchemaForFields(visibleFields, answers);
+    const parseResult = pageSchema.safeParse(answers);
 
-    currentLayer.fields.forEach(field => {
-      const err = validateField(field, answers[field.id]);
-      if (err) {
-        layerIsValid = false;
-        newErrors[field.id] = err;
-      } else {
-        delete newErrors[field.id];
-      }
-    });
-
-    setErrors(newErrors);
-
-    if (!layerIsValid) {
+    if (!parseResult.success) {
+      const newErrors: Record<string, string> = { ...errors };
+      
+      // Clear errors of current layer fields first
+      currentLayer.fields.forEach((f) => delete newErrors[f.id]);
+      
+      // Set new errors
+      parseResult.error.issues.forEach((err: any) => {
+        const fieldId = err.path[0] as string;
+        if (fieldId) {
+          newErrors[fieldId] = err.message;
+        }
+      });
+      
+      setErrors(newErrors);
       toast.error("Please stabilize all parameters in this layer before proceeding.");
       return;
     }
+
+    // Clear validation errors for this layer
+    setErrors((prev) => {
+      const updated = { ...prev };
+      currentLayer.fields.forEach((f) => delete updated[f.id]);
+      return updated;
+    });
 
     const isInverted = form.theme === 'tenet' && process.env.NEXT_PUBLIC_REFRESH_SECRET;
     if (currentLayerIndex < layers.length - 1) {
@@ -255,14 +371,22 @@ export function FormRunner({ form, fields, passcode, isPreview, onSimulateSubmit
 
     const elapsedSeconds = Math.max(1, Math.round((Date.now() - startedAt.current) / 1000));
 
+    // Filter only visible answers for submission
+    const visibleAnswers: Record<string, any> = {};
+    fields.forEach((field) => {
+      if (isFieldVisible(field, answers)) {
+        visibleAnswers[field.id] = answers[field.id];
+      }
+    });
+
     try {
       if (isPreview && onSimulateSubmit) {
-        onSimulateSubmit(answers);
+        onSimulateSubmit(visibleAnswers);
         await new Promise((resolve) => setTimeout(resolve, 800));
       } else {
         await submitMutation.mutateAsync({
           formId: form.id,
-          data: answers,
+          data: visibleAnswers,
           password: passcode,
           timeToComplete: elapsedSeconds,
         });
@@ -326,7 +450,9 @@ export function FormRunner({ form, fields, passcode, isPreview, onSimulateSubmit
   // Render Thank You Page
   if (submitStatus === "success" && totemStatus === "stopped" && !showFlash) {
     return (
-    <div className={`skin-${form.theme} min-h-screen bg-[var(--theme-bg)] text-[var(--theme-text)] flex flex-col items-center justify-center p-6 md:p-8 font-mono relative`}>
+    <div
+      className={`skin-${form.theme} min-h-screen bg-[var(--theme-bg)] text-[var(--theme-text)] flex flex-col items-center justify-center p-6 md:p-8 font-mono relative`}
+    >
         <div className="absolute inset-0 bg-[linear-gradient(to_right,currentColor_1px,transparent_1px),linear-gradient(to_bottom,currentColor_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-3 pointer-events-none" />
 
         <motion.div
@@ -394,7 +520,9 @@ export function FormRunner({ form, fields, passcode, isPreview, onSimulateSubmit
 
   // Render Form Runner (active questions)
   return (
-    <div className={`skin-${form.theme} min-h-screen bg-[var(--theme-bg)] text-[var(--theme-text)] flex flex-col items-center justify-center p-6 md:p-8 font-mono relative overflow-hidden`}>
+    <div
+      className={`skin-${form.theme} min-h-screen bg-[var(--theme-bg)] text-[var(--theme-text)] flex flex-col items-center justify-center p-6 md:p-8 font-mono relative overflow-hidden`}
+    >
       {/* Background grids */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,currentColor_1px,transparent_1px),linear-gradient(to_bottom,currentColor_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-3 pointer-events-none" />
 
@@ -472,15 +600,18 @@ export function FormRunner({ form, fields, passcode, isPreview, onSimulateSubmit
                 <h2 className="text-xl font-light font-cormorant text-current/90 mb-2 tracking-wide border-b border-current/20 pb-3">{currentLayer.title}</h2>
               )}
               {currentLayer && currentLayer.fields.length > 0 ? (
-                currentLayer.fields.map((field) => (
-                  <FieldRenderer
-                    key={field.id}
-                    field={field}
-                    value={answers[field.id]}
-                    onChange={(val) => handleValueChange(field, val)}
-                    error={errors[field.id]}
-                  />
-                ))
+                currentLayer.fields.map((field) => {
+                  if (!isFieldVisible(field, answers)) return null;
+                  return (
+                    <FieldRenderer
+                      key={field.id}
+                      field={field}
+                      value={answers[field.id]}
+                      onChange={(val) => handleValueChange(field, val)}
+                      error={errors[field.id]}
+                    />
+                  );
+                })
               ) : (
                 <div className="text-center text-xs opacity-50 uppercase tracking-widest py-8">
                   Limbo detected: No parameters projected in this layer.
@@ -493,7 +624,7 @@ export function FormRunner({ form, fields, passcode, isPreview, onSimulateSubmit
         {/* Bottom Area: Progress & Controls */}
         <div className="border-t border-current/10 pt-4 flex flex-col space-y-4 shrink-0">
           <div className={form.theme === 'tenet' ? 'origin-right scale-x-[-1]' : ''}>
-              <ProgressBar currentIndex={currentLayerIndex} total={layers.length} />
+              <ProgressBar currentIndex={currentLayerIndex} total={layers.length} mode="nodes" />
             </div>
 
           <div className="flex items-center justify-between">
