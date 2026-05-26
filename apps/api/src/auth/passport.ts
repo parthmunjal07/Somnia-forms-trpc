@@ -12,6 +12,7 @@ if (env.GOOGLE_OAUTH_CLIENT_ID && env.GOOGLE_OAUTH_CLIENT_SECRET) {
         clientID: env.GOOGLE_OAUTH_CLIENT_ID,
         clientSecret: env.GOOGLE_OAUTH_CLIENT_SECRET,
         callbackURL: `${env.BASE_URL}/api/auth/google/callback`,
+        proxy:true
       },
       async (accessToken, refreshToken, profile, done) => {
         try {
