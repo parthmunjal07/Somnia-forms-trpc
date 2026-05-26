@@ -32,7 +32,7 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         // Fallback to allow same-origin resources (like favicon.ico) by default
-        defaultSrc: ["'self'"], 
+        defaultSrc: ["'none'"], 
         
         // ALLOWS your network requests, API calls, and CSRF validations
         connectSrc: [
