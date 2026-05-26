@@ -31,8 +31,8 @@ app.use(
   helmet({
     contentSecurityPolicy: {
       directives: {
-        // Keeps your strict default fallback
-        defaultSrc: ["'none'"], 
+        // Fallback to allow same-origin resources (like favicon.ico) by default
+        defaultSrc: ["'self'"], 
         
         // ALLOWS your network requests, API calls, and CSRF validations
         connectSrc: [
@@ -40,10 +40,11 @@ app.use(
           "http://localhost:8000"       // Your local development API URL
         ],
         
-        // Recommended basics to keep the app working safely
-        scriptSrc: ["'self'"],
-        styleSrc: ["'self'"],
-        imgSrc: ["'self'", "data:"],
+        // Allows scripts, styles, and assets for Scalar API reference (including CDNs & inline code)
+        scriptSrc: ["'self'", "'unsafe-inline'", "cdn.jsdelivr.net", "unpkg.com"],
+        styleSrc: ["'self'", "'unsafe-inline'", "cdn.jsdelivr.net", "fonts.googleapis.com", "unpkg.com"],
+        fontSrc: ["'self'", "fonts.gstatic.com", "data:"],
+        imgSrc: ["'self'", "data:", "cdn.jsdelivr.net"],
       },
     },
   })
@@ -226,6 +227,10 @@ app.get("/", (_req, res) => {
 
 app.get("/health", (_req, res) => {
   return res.json({ message: "Somnia server is healthy", healthy: true });
+});
+
+app.get("/favicon.ico", (_req, res) => {
+  res.status(204).end();
 });
 
 logger.debug(`openapi.json: ${env.BASE_URL}/openapi.json`);

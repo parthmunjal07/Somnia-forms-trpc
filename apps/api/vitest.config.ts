@@ -9,6 +9,9 @@ export default defineConfig({
     env: {
       NODE_ENV: "development",
       JWT_SECRET: "test-secret-that-is-at-least-32-characters-long",
+      REFRESH_SECRET: "test-refresh-secret-that-is-at-least-32-characters-long",
+      RESEND_API_KEY: "re_test_key",
+      CSRF_SECRET: "test-csrf-secret",
       FRONTEND_URL: "http://localhost:3000",
       ALLOWED_ORIGINS: "http://localhost:3000",
       DATABASE_URL: "postgres://user:pass@localhost:5432/db",
