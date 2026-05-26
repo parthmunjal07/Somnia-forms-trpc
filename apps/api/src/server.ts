@@ -52,17 +52,27 @@ app.use(
 
 
 // ─── CORS ─────────────────────────────────────────────────────────────────────
-const allowedOrigins = env.ALLOWED_ORIGINS.split(",").map((o) => o.trim());
+// Clean up origins: remove accidental quotes and trailing slashes
+const allowedOrigins = env.ALLOWED_ORIGINS.split(",")
+  .map((o) => o.trim().replace(/^["']|["']$/g, "").replace(/\/$/, ""));
+
 logger.info(`CORS allowed origins: ${allowedOrigins.join(", ")}`);
 app.use(
   cors({
     origin: (origin, callback) => {
-      // allow server-to-server calls with no origin header
-      if (!origin || allowedOrigins.includes(origin)) {
+      // Allow server-to-server calls with no origin header
+      if (!origin) {
+        return callback(null, true);
+      }
+      
+      const cleanOrigin = origin.trim().replace(/\/$/, "");
+      if (allowedOrigins.includes(cleanOrigin)) {
         callback(null, true);
       } else {
-        logger.warn(`CORS rejected origin: ${origin}`);
-        callback(new Error(`Origin ${origin} not allowed by CORS`));
+        logger.warn(`CORS rejected origin: ${origin} (clean: ${cleanOrigin})`);
+        // Standard CORS rejection: pass false instead of throwing an Error.
+        // Throwing an Error triggers the global 500 handler, masking the CORS issue.
+        callback(null, false);
       }
     },
     credentials: true,
