@@ -7,6 +7,7 @@ interface CreateTRPCHttpBatchClientClientOpts {
 }
 
 function getBaseUrl() {
+  if (typeof window !== "undefined") return ""; // use relative URL on client
   return env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 }
 
