@@ -230,14 +230,14 @@ const handleLogout = async () => {
       {/* Header */}
       <header className="sticky top-0 z-40 bg-[rgba(10,10,15,0.75)] backdrop-blur-[12px] border-b border-[rgba(200,216,232,0.1)] px-6 py-4 flex items-center justify-between">
         <div className="flex items-center space-x-3">
-          <span className="text-xl tracking-[0.25em] font-light text-[#C9933A] font-cormorant select-none">
+          <span className="text-2xl tracking-[0.25em] font-light text-[#C9933A] font-cormorant select-none">
             SOMNIA
           </span>
-          <span className="hidden sm:inline text-[9px] border border-[rgba(200,216,232,0.1)] text-[#8BA3BF] px-1.5 py-0.5 rounded tracking-widest uppercase">
+          <span className="hidden sm:inline text-[13px] border border-[rgba(200,216,232,0.1)] text-[#8BA3BF] px-1.5 py-0.5 rounded tracking-widest uppercase">
             v1.0.0
           </span>
           <div className="hidden md:flex pl-4 border-l border-[rgba(200,216,232,0.1)]">
-            <a href="/explore" className="text-[11px] tracking-[0.15em] uppercase text-[#8BA3BF] hover:text-[#EEF3F8] transition-colors">
+            <a href="/explore" className="text-[14px] tracking-[0.15em] uppercase text-[#8BA3BF] hover:text-[#EEF3F8] transition-colors">
               Explore
             </a>
           </div>
@@ -245,15 +245,15 @@ const handleLogout = async () => {
 
         <div className="flex items-center space-x-6">
           <div className="hidden md:flex flex-col text-right">
-            <span className="text-[10px] text-[#8BA3BF] font-semibold uppercase">{user?.email ? user.email.split("@")[0] : "Dreamer"}</span>
-            <span className="text-[9px] text-[#8BA3BF]/60 tracking-wider">
+            <span className="text-[12px] text-[#8BA3BF] font-semibold uppercase">{user?.email ? user.email.split("@")[0] : "Dreamer"}</span>
+            <span className="text-[12px] text-[#8BA3BF]/60 tracking-wider">
               ROLE: {user?.role ? user.role.replace("THE_", "") : "UNKNOWN"}
             </span>
           </div>
 
           <button
             onClick={handleLogout}
-            className="flex items-center space-x-1.5 text-[#8BA3BF] hover:text-red-400 transition-colors text-xs uppercase tracking-wider cursor-pointer select-none"
+            className="flex items-center space-x-1.5 text-[#8BA3BF] hover:text-red-400 transition-colors text-sm uppercase tracking-wider cursor-pointer select-none"
           >
             <LogOut size={14} />
             <span className="hidden sm:inline">Wake Up</span>

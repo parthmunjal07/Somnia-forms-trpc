@@ -43,7 +43,7 @@ export function ThemePicker({ currentTheme, onChange }: ThemePickerProps) {
                 </div>
               </div>
               
-              <div className="text-xs font-mono">{theme.name}</div>
+              <div className="text-md font-mono">{theme.name}</div>
               
               {isActive && (
                 <div className="absolute top-2 right-2 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 text-black">

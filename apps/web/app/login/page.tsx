@@ -207,7 +207,7 @@ export default function LoginPage() {
             className={`flex-1 pb-4 text-center transition-all duration-200 ${activeTab === "login" ? "text-[#C9933A]" : "text-[#8BA3BF]/40 hover:text-[#8BA3BF]"
               }`}
           >
-            Connect
+            Login
           </button>
           <button
             type="button"
@@ -215,7 +215,7 @@ export default function LoginPage() {
             className={`flex-1 pb-4 text-center transition-all duration-200 ${activeTab === "register" ? "text-[#C9933A]" : "text-[#8BA3BF]/40 hover:text-[#8BA3BF]"
               }`}
           >
-            Forge ID
+            Register ID
           </button>
 
           {/* Active Tab Indicator Bar */}
@@ -308,8 +308,8 @@ export default function LoginPage() {
             {isLoading
               ? "Connecting..."
               : activeTab === "login"
-                ? "Establish Link"
-                : "Forge Identity"}
+                ? "Establish Login"
+                : "Register Identity"}
           </button>
         </form>
 

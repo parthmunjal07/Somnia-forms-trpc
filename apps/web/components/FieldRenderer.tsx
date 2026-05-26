@@ -193,13 +193,13 @@ export function FieldRenderer({
                   }}
                   className={`flex items-center justify-between px-4 py-3 rounded border text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer text-left ${
                     isSelected
-                      ? "bg-current text-black border-current font-bold"
+                      ? "bg-[var(--theme-accent)] text-[var(--theme-bg)] border-[var(--theme-accent)] font-bold"
                       : "bg-black/40 border-current/10 text-current hover:bg-current/5 hover:border-current/30"
                   }`}
                 >
                   <span>{opt}</span>
                   <kbd className={`text-[9px] px-1.5 py-0.5 rounded border ml-2 ${
-                    isSelected ? "bg-black/20 border-black/20 text-black" : "bg-zinc-900 border-stone-850 text-stone-500"
+                    isSelected ? "bg-black/20 border-black/20 text-[var(--theme-bg)]" : "bg-zinc-900 border-stone-850 text-stone-500"
                   }`}>
                     {charLabel}
                   </kbd>
@@ -232,20 +232,20 @@ export function FieldRenderer({
                   }}
                   className={`flex items-center justify-between px-4 py-3 rounded border text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer text-left ${
                     isSelected
-                      ? "bg-current text-black border-current font-bold"
+                      ? "bg-[var(--theme-accent)] text-[var(--theme-bg)] border-[var(--theme-accent)] font-bold"
                       : "bg-black/40 border-current/10 text-current hover:bg-current/5 hover:border-current/30"
                   }`}
                 >
                   <div className="flex items-center space-x-3">
                     <div className={`w-3.5 h-3.5 rounded-sm border flex items-center justify-center ${
-                      isSelected ? "border-black bg-black" : "border-current/30 bg-transparent"
+                      isSelected ? "border-[var(--theme-bg)] bg-[var(--theme-bg)]" : "border-current/30 bg-transparent"
                     }`}>
-                      {isSelected && <div className="w-1.5 h-1.5 bg-current rounded-sm" />}
+                      {isSelected && <div className="w-1.5 h-1.5 bg-[var(--theme-accent)] rounded-sm" />}
                     </div>
                     <span>{opt}</span>
                   </div>
                   <kbd className={`text-[9px] px-1.5 py-0.5 rounded border ml-2 ${
-                    isSelected ? "bg-black/20 border-black/20 text-black" : "bg-zinc-900 border-stone-850 text-stone-500"
+                    isSelected ? "bg-black/20 border-black/20 text-[var(--theme-bg)]" : "bg-zinc-900 border-stone-850 text-stone-500"
                   }`}>
                     {charLabel}
                   </kbd>
@@ -261,20 +261,20 @@ export function FieldRenderer({
             onClick={() => onChange(!value)}
             className={`w-full flex items-center justify-between px-4 py-3.5 rounded border text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer text-left ${
               value
-                ? "bg-current text-black border-current font-bold"
+                ? "bg-[var(--theme-accent)] text-[var(--theme-bg)] border-[var(--theme-accent)] font-bold"
                 : "bg-black/40 border-current/10 text-current hover:bg-current/5 hover:border-current/30"
             }`}
           >
             <div className="flex items-center space-x-3">
               <div className={`w-4 h-4 rounded border flex items-center justify-center ${
-                value ? "border-black bg-black" : "border-current/30 bg-transparent"
+                value ? "border-[var(--theme-bg)] bg-[var(--theme-bg)]" : "border-current/30 bg-transparent"
               }`}>
-                {value && <div className="w-2 h-2 bg-current rounded" />}
+                {value && <div className="w-2 h-2 bg-[var(--theme-accent)] rounded" />}
               </div>
               <span>I confirm / acknowledge parameters</span>
             </div>
             <kbd className={`text-[9px] px-1.5 py-0.5 rounded border ml-2 ${
-              value ? "bg-black/20 border-black/20 text-black" : "bg-zinc-900 border-stone-850 text-stone-500"
+              value ? "bg-black/20 border-black/20 text-[var(--theme-bg)]" : "bg-zinc-900 border-stone-850 text-stone-500"
             }`}>
               Y
             </kbd>
@@ -307,13 +307,13 @@ export function FieldRenderer({
                     }}
                     className={`flex-1 aspect-square max-w-[52px] rounded border flex flex-col items-center justify-center transition-all cursor-pointer ${
                       isSelected
-                        ? "bg-current text-black border-current font-bold shadow-[0_0_12px_rgba(255,255,255,0.2)]"
+                        ? "bg-[var(--theme-accent)] text-[var(--theme-bg)] border-[var(--theme-accent)] font-bold shadow-[0_0_12px_var(--theme-accent)]"
                         : "bg-black/40 border-current/10 text-current hover:bg-current/5 hover:border-current/30"
                     }`}
                   >
                     <span className="text-sm font-bold">{ratingNum}</span>
                     <span className={`text-[8px] mt-0.5 opacity-40 font-normal ${
-                      isSelected ? "text-black opacity-60" : ""
+                      isSelected ? "text-[var(--theme-bg)] opacity-60" : ""
                     }`}>
                       [{ratingNum}]
                     </span>

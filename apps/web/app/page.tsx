@@ -585,7 +585,7 @@ export default function Home() {
                     background: "rgba(255,255,255,0.015)",
                   }}
                 >
-                  <div className="flex gap-1.5">
+                  <div className="flex gap-1.5 shrink-0">
                     {[0.3, 0.18, 0.1].map((o, i) => (
                       <span
                         key={i}
@@ -596,30 +596,30 @@ export default function Home() {
                   </div>
                   {/* UX FIX: Card header now says "Sample Form" so users
                     instantly know this is a preview of the product */}
-                  <span className="text-[13px] tracking-[0.18em] uppercase text-[#8BA3BF]/40">
-                    Sample Form — Inception Theme
+                  <span className="text-[10px] sm:text-[13px] tracking-[0.18em] uppercase text-[#8BA3BF]/40 truncate mx-2 text-center">
+                    Sample Form <span className="hidden sm:inline">— Inception Theme</span>
                   </span>
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-1.5 shrink-0">
                     <span className="w-1 h-1 rounded-full bg-[#4AFF9E] animate-pulse" />
-                    <span className="text-[13px] tracking-[0.1em] uppercase text-[#4AFF9E]/60">
+                    <span className="text-[11px] sm:text-[13px] tracking-[0.1em] uppercase text-[#4AFF9E]/60">
                       Live
                     </span>
                   </div>
                 </div>
-                <div className="px-6 py-5">
+                <div className="px-4 sm:px-6 py-5">
                   {/* UX FIX: Question is relatable and self-explanatory */}
-                  <p className="font-cormorant font-light text-[#EEF3F8] text-2xl leading-snug mb-4">
+                  <p className="font-cormorant font-light text-[#EEF3F8] text-xl sm:text-2xl leading-snug mb-4">
                     What's your biggest challenge right now?
                   </p>
-                  <div
-                    className="w-full px-3.5 py-3 text-[15px] text-[#8BA3BF]/40 rounded-sm mb-1"
+                  <input
+                    type="text"
+                    placeholder="Type your answer here..."
+                    className="w-full px-3.5 py-3 text-[14px] sm:text-[15px] text-[#EEF3F8] placeholder-[#8BA3BF]/40 rounded-sm mb-1 focus:outline-none focus:border-[#C9933A]/50 focus:shadow-[0_0_15px_rgba(201,147,58,0.15)] transition-all"
                     style={{
                       background: "rgba(255,255,255,0.025)",
                       border: "0.5px solid rgba(200,216,232,0.1)",
                     }}
-                  >
-                    Type your answer here...
-                  </div>
+                  />
                   <div className="flex items-center gap-3 mt-5">
                     {/* UX FIX: Progress says "Question 1 of 3" not "Layer 1/3"
                       so visitors immediately understand the form flow */}
@@ -722,7 +722,6 @@ export default function Home() {
             className="py-24 px-4"
             style={{
               borderTop: "0.5px solid rgba(200,216,232,0.06)",
-              background: "rgba(15,21,32,0.4)",
             }}
           >
             <div className="max-w-[1200px] mx-auto">
@@ -743,11 +742,18 @@ export default function Home() {
               </div>
 
               {/* Row 1 — 3 columns */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-[rgba(200,216,232,0.05)]">
-                {ROLES.filter((r) => r.row === 1).map((role) => (
+              <div
+                className="grid grid-cols-1 md:grid-cols-3"
+                style={{ border: "0.5px solid rgba(200,216,232,0.06)" }}
+              >
+                {ROLES.filter((r) => r.row === 1).map((role, i) => (
                   <div
                     key={role.code}
-                    className="bg-[#0A0A0F] p-8 group hover:bg-[#0F1520] transition-colors duration-300"
+                    className="p-8 group hover:bg-[#0F1520] transition-colors duration-300"
+                    style={{
+                      borderRight:
+                        i < 2 ? "0.5px solid rgba(200,216,232,0.06)" : "none",
+                    }}
                   >
                     <h3 className="font-cormorant text-3xl text-[#EEF3F8] mb-1">
                       {role.label}
@@ -777,12 +783,20 @@ export default function Home() {
 
               {/* Row 2 — 2 columns, wider cards */}
               <div
-                className="grid grid-cols-1 md:grid-cols-2 gap-px bg-[rgba(200,216,232,0.05)] mt-px"
+                className="grid grid-cols-1 md:grid-cols-2"
+                style={{
+                  border: "0.5px solid rgba(200,216,232,0.06)",
+                  borderTop: "none"
+                }}
               >
-                {ROLES.filter((r) => r.row === 2).map((role) => (
+                {ROLES.filter((r) => r.row === 2).map((role, i) => (
                   <div
                     key={role.code}
-                    className="bg-[#0A0A0F] p-8 group hover:bg-[#0F1520] transition-colors duration-300"
+                    className="p-8 group hover:bg-[#0F1520] transition-colors duration-300"
+                    style={{
+                      borderRight:
+                        i < 1 ? "0.5px solid rgba(200,216,232,0.06)" : "none",
+                    }}
                   >
                     {/* Platform/Public tag — contextualises these as special roles */}
                     <h3 className="font-cormorant text-3xl text-[#EEF3F8] mb-1">
@@ -887,17 +901,23 @@ export default function Home() {
             className="py-24 px-4"
             style={{
               borderTop: "0.5px solid rgba(200,216,232,0.06)",
-              background: "rgba(15,21,32,0.4)",
             }}
           >
             <p className="text-center text-[15px] tracking-[0.28em] uppercase text-[#8BA3BF]/35 mb-14">
               What people are saying
             </p>
-            <div className="max-w-[1200px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-px bg-[rgba(200,216,232,0.05)]">
-              {TESTIMONIALS.map((t) => (
+            <div
+              className="max-w-[1200px] mx-auto grid grid-cols-1 md:grid-cols-3"
+              style={{ border: "0.5px solid rgba(200,216,232,0.06)" }}
+            >
+              {TESTIMONIALS.map((t, i) => (
                 <div
                   key={t.name}
-                  className="bg-[#0A0A0F] px-8 py-10 hover:bg-[#0F1520] transition-colors duration-300"
+                  className="px-8 py-10 hover:bg-[#0F1520] transition-colors duration-300"
+                  style={{
+                    borderRight:
+                      i < 2 ? "0.5px solid rgba(200,216,232,0.06)" : "none",
+                  }}
                 >
                   <span
                     className="font-cormorant text-[4rem] leading-none text-[#C9933A]/25 block mb-4"

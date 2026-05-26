@@ -12,6 +12,7 @@ const fieldTypeEnum = z.enum([
   "date",
   "rating",
   "checkbox",
+  "layer_break",
 ]);
 
 export const fieldsRouter = router({
