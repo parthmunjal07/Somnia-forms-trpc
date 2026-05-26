@@ -191,33 +191,32 @@ app.get("/api/auth/google", (req, res, next) => {
   passport.authenticate("google", { scope: ["profile", "email"] })(req, res, next);
 });
 
-app.get(
-  "/api/auth/google/callback",
-  (req, res, next) => {
-    if (!env.GOOGLE_OAUTH_CLIENT_ID) {
-      return res.redirect(`${env.FRONTEND_URL}/login?error=oauth_not_configured`);
-    }
-    passport.authenticate("google", { session: false, failureRedirect: `${env.FRONTEND_URL}/login?error=oauth_failed` })(req, res, next);
-  },
-  (req, res) => {
+app.get("/api/auth/google/callback", (req, res, next) => {
+  if (!env.GOOGLE_OAUTH_CLIENT_ID) {
+    return res.redirect(`${env.FRONTEND_URL}/login?error=oauth_not_configured`);
+  }
+
+  passport.authenticate("google", { session: false }, (err: Error | null, user: SelectUser | false, info: unknown) => {
     try {
-      const user = req.user as SelectUser;
+      if (err) {
+        logger.error("Google OAuth strategy error", err);
+        return res.redirect(`${env.FRONTEND_URL}/login?error=${encodeURIComponent(err.message || "oauth_strategy_error")}`);
+      }
+
       if (!user) {
+        logger.warn("Google OAuth: no user returned", { info });
         return res.redirect(`${env.FRONTEND_URL}/login?error=oauth_failed`);
       }
 
       const tokens = generateTokens(user);
-      // Cast res to any to avoid type issues with express vs minimal CookieResponse
       setTokenCookies(res as any, tokens);
-      
-      // Redirect to frontend dashboard or home
       res.redirect(`${env.FRONTEND_URL}/dashboard`);
     } catch (error) {
       logger.error("Google OAuth callback error", error);
       res.redirect(`${env.FRONTEND_URL}/login?error=oauth_server_error`);
     }
-  }
-);
+  })(req, res, next);
+});
 
 // ─── OpenAPI Document ─────────────────────────────────────────────────────────
 const openApiDocument = generateOpenApiDocument(serverRouter, {
