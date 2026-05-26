@@ -8,7 +8,7 @@ export const env = createEnv({
     // In development: set NEXT_PUBLIC_API_URL=http://localhost:8000 in apps/web/.env.local
     // In production:  set NEXT_PUBLIC_API_URL=https://your-api.railway.app in Vercel env vars
     NEXT_PUBLIC_API_URL: z.string().url(),
-    NEXT_PUBLIC_APP_URL: z.string().url(),
+    NEXT_PUBLIC_APP_URL: z.string().url().optional(),
   },
 
   runtimeEnv: {

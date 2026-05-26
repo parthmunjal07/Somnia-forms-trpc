@@ -771,7 +771,7 @@ export default function Home() {
           <section
             className="py-24 px-4"
             style={{
-              borderTop: "0.5px solid rgba(200,216,232,0.06)",
+              borderTop: "0.5px solid rgba(200,216,232,0.1)",
             }}
           >
             <div className="max-w-[1200px] mx-auto">
@@ -794,7 +794,7 @@ export default function Home() {
               {/* Row 1 — 3 columns */}
               <div
                 className="grid grid-cols-1 md:grid-cols-3"
-                style={{ border: "0.5px solid rgba(200,216,232,0.06)" }}
+                style={{ border: "0.5px solid rgba(200,216,232,0.2)" }}
               >
                 {ROLES.filter((r) => r.row === 1).map((role, i) => (
                   <div
@@ -802,7 +802,7 @@ export default function Home() {
                     className="p-8 group hover:bg-[#0F1520] transition-colors duration-300"
                     style={{
                       borderRight:
-                        i < 2 ? "0.5px solid rgba(200,216,232,0.06)" : "none",
+                        i < 2 ? "0.5px solid rgba(200,216,232,0.2)" : "none",
                     }}
                   >
                     <h3 className="font-cormorant text-3xl text-[#EEF3F8] mb-1">
@@ -835,7 +835,7 @@ export default function Home() {
               <div
                 className="grid grid-cols-1 md:grid-cols-2"
                 style={{
-                  border: "0.5px solid rgba(200,216,232,0.06)",
+                  border: "0.5px solid rgba(200,216,232,0.2)",
                   borderTop: "none"
                 }}
               >
@@ -845,7 +845,7 @@ export default function Home() {
                     className="p-8 group hover:bg-[#0F1520] transition-colors duration-300"
                     style={{
                       borderRight:
-                        i < 1 ? "0.5px solid rgba(200,216,232,0.06)" : "none",
+                        i < 1 ? "0.5px solid rgba(200,216,232,0.2)" : "none",
                     }}
                   >
                     {/* Platform/Public tag — contextualises these as special roles */}
@@ -929,7 +929,9 @@ export default function Home() {
                 ].map((s) => (
                   <div
                     key={s.label}
-                    className="bg-[#0A0A0F] p-8 hover:bg-[#0F1520] transition-colors"
+                    className={`p-8 hover:bg-[#0F1520] transition-colors duration-1500 ${
+                      isInactive ? "bg-[#0A361A]" : "bg-[#0A0A0F]"
+                    }`}
                   >
                     <p className="text-[10px] tracking-[0.12em] uppercase text-[#C9933A]/60 mb-2">
                       {s.label}
