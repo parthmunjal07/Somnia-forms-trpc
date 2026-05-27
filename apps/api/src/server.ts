@@ -128,9 +128,9 @@ app.get("/api/csrf", (_req, res) => {
   res.cookie("csrf_token", csrfToken, {
     // NOT httpOnly — client JS must read this and send it back via X-CSRF-Token header
     secure: env.NODE_ENV === "production",
-    // "none" in production for cross-domain (Vercel frontend → Railway API).
-    // "strict" in development when both run on localhost.
-    sameSite: env.NODE_ENV === "production" ? "none" as const : "strict" as const,
+    // "lax" — all production traffic now goes through the Vercel same-origin proxy,
+    // so cross-site "none" is no longer needed and causes cookie rejection in some browsers.
+    sameSite: env.NODE_ENV === "production" ? "lax" as const : "strict" as const,
     path: "/",
   });
   return res.json({ csrfToken });
@@ -225,7 +225,15 @@ app.get("/api/auth/google/callback", (req, res, next) => {
 
       const tokens = generateTokens(user);
       setTokenCookies(res as any, tokens);
-      res.redirect(`${env.FRONTEND_URL}/dashboard`);
+
+      // IMPORTANT: Do NOT use res.redirect() here.
+      // Vercel's rewrite proxy silently strips Set-Cookie headers from 302 redirect
+      // responses. By returning a 200 HTML page with a <meta> redirect, the browser
+      // receives and stores the cookies BEFORE navigating to the dashboard.
+      const redirectUrl = `${env.FRONTEND_URL}/dashboard`;
+      res.status(200).send(`<!DOCTYPE html>
+<html><head><meta http-equiv="refresh" content="0;url=${redirectUrl}"><script>window.location.href="${redirectUrl}";</script></head>
+<body>Redirecting...</body></html>`);
     } catch (error) {
       logger.error("Google OAuth callback error", error);
       res.redirect(`${env.FRONTEND_URL}/login?error=oauth_server_error`);
