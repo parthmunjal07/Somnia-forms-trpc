@@ -26,9 +26,16 @@ function isProduction() {
   return process.env.NODE_ENV === "production" || process.env.NODE_ENV === ("prod" as string);
 }
 
+/** Cookies must be Secure on HTTPS. Detect this from NODE_ENV or BASE_URL. */
+function shouldBeSecure() {
+  if (isProduction()) return true;
+  if ((process.env.BASE_URL ?? "").startsWith("https")) return true;
+  return false;
+}
+
 const COOKIE_OPTS_BASE = {
   httpOnly: true,
-  secure: isProduction(),
+  secure: shouldBeSecure(),
   // All production traffic goes through the Vercel same-origin proxy (/trpc, /api),
   // so cookies are first-party. "lax" is correct and widely compatible.
   // "none" was causing cookie rejection in many browsers.

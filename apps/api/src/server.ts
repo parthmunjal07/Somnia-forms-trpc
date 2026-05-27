@@ -26,6 +26,10 @@ function adaptContext(opts: CreateExpressContextOptions) {
 
 export const app = express();
 
+// Railway (and most PaaS) run behind a reverse proxy / load balancer.
+// Express must trust the proxy so req.protocol reflects the original HTTPS request.
+app.set("trust proxy", 1);
+
 // ─── Security Headers ─────────────────────────────────────────────────────────
 app.use(
   helmet({
@@ -127,10 +131,10 @@ app.get("/api/csrf", (_req, res) => {
   const csrfToken = randomBytes(32).toString("hex");
   res.cookie("csrf_token", csrfToken, {
     // NOT httpOnly — client JS must read this and send it back via X-CSRF-Token header
-    secure: env.NODE_ENV === "production",
+    secure: env.NODE_ENV === "production" || env.BASE_URL.startsWith("https"),
     // "lax" — all production traffic now goes through the Vercel same-origin proxy,
     // so cross-site "none" is no longer needed and causes cookie rejection in some browsers.
-    sameSite: env.NODE_ENV === "production" ? "lax" as const : "strict" as const,
+    sameSite: "lax" as const,
     path: "/",
   });
   return res.json({ csrfToken });
