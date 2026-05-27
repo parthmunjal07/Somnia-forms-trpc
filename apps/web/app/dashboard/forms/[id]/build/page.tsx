@@ -197,6 +197,9 @@ export default function BuildPage({ params }: { params: Promise<{ id: string }> 
   // Onboarding Spotlight
   const [showOnboarding, setShowOnboarding] = useState(false);
 
+  // Track if changes have been made to a published form
+  const [hasUnpublishedEdits, setHasUnpublishedEdits] = useState(false);
+
   useEffect(() => {
     if (!isFieldsLoading && fields.length === 0 && !localStorage.getItem("somnia_builder_seen")) {
       setShowOnboarding(true);
@@ -240,6 +243,7 @@ export default function BuildPage({ params }: { params: Promise<{ id: string }> 
   // tRPC Mutations
   const updateFormMutation = trpc.forms.update.useMutation({
     onSuccess: () => {
+      setHasUnpublishedEdits(true);
       utils.forms.getById.invalidate({ id });
       utils.forms.list.invalidate();
     },
@@ -278,6 +282,7 @@ export default function BuildPage({ params }: { params: Promise<{ id: string }> 
 
   const createFieldMutation = trpc.fields.create.useMutation({
     onSuccess: () => {
+      setHasUnpublishedEdits(true);
       toast.success("Field projection inserted.");
       utils.fields.list.invalidate({ formId: id });
     },
@@ -285,12 +290,16 @@ export default function BuildPage({ params }: { params: Promise<{ id: string }> 
   });
 
   const updateFieldMutation = trpc.fields.update.useMutation({
-    onSuccess: () => utils.fields.list.invalidate({ formId: id }),
+    onSuccess: () => {
+      setHasUnpublishedEdits(true);
+      utils.fields.list.invalidate({ formId: id })
+    },
     onError: (err) => toast.error(err.message || "Field configuration failed."),
   });
 
   const deleteFieldMutation = trpc.fields.delete.useMutation({
     onSuccess: () => {
+      setHasUnpublishedEdits(true);
       utils.fields.list.invalidate({ formId: id });
     },
     onError: (err) => toast.error(err.message || "Failed to collapse field."),
@@ -324,7 +333,10 @@ export default function BuildPage({ params }: { params: Promise<{ id: string }> 
   };
 
   const reorderFieldsMutation = trpc.fields.reorder.useMutation({
-    onSuccess: () => utils.fields.list.invalidate({ formId: id }),
+    onSuccess: () => {
+      setHasUnpublishedEdits(true);
+      utils.fields.list.invalidate({ formId: id })
+    },
     onError: (err) => toast.error(err.message || "Reordering sequence failed."),
   });
 
@@ -539,27 +551,55 @@ export default function BuildPage({ params }: { params: Promise<{ id: string }> 
           )}
 
           {/* Publish / Status Toggle */}
-          <div className="flex items-center border border-stone-850 rounded bg-stone-950 p-0.5 shrink-0">
-            <button
-              onClick={() => {
-                if (isForger) {
-                  toast.error("Forgers do not hold publishing keys.");
-                  return;
-                }
-                if (isReadOnly) return;
-                updateFormMutation.mutate({
-                  id,
-                  status: form?.status === "published" ? "draft" : "published",
-                });
-              }}
-              disabled={isForger || isReadOnly}
-              className={`px-4 py-2 rounded text-sm uppercase font-bold tracking-widest transition-all cursor-pointer ${form?.status === "published"
-                  ? "bg-emerald-950/30 text-emerald-400 border border-emerald-900/60 shadow-[0_0_10px_rgba(16,185,129,0.1)]"
-                  : "text-stone-500 hover:text-stone-300 border border-transparent"
-                } ${isForger || isReadOnly ? "opacity-35 cursor-not-allowed" : ""}`}
-            >
-              {form?.status === "published" ? "Published" : "Draft (Publish)"}
-            </button>
+          <div className="flex items-center space-x-2 shrink-0">
+            {form?.status === "published" && (
+              <button 
+                onClick={() => {
+                  if (isForger || isReadOnly) return;
+                  updateFormMutation.mutate({ id, status: "draft" });
+                  setHasUnpublishedEdits(false);
+                }} 
+                disabled={isForger || isReadOnly}
+                className={`text-[10px] text-stone-500 hover:text-stone-300 px-2 transition-colors uppercase tracking-widest font-semibold ${isForger || isReadOnly ? "hidden" : ""}`}
+                title="Revert to Draft (Unpublish)"
+              >
+                Unpublish
+              </button>
+            )}
+            <div className="flex items-center border border-stone-850 rounded bg-stone-950 p-0.5">
+              <button
+                onClick={() => {
+                  if (isForger) {
+                    toast.error("Forgers do not hold publishing keys.");
+                    return;
+                  }
+                  if (isReadOnly) return;
+
+                  if (form?.status === "published") {
+                    setHasUnpublishedEdits(false);
+                    toast.success("Live form updated successfully!");
+                  } else {
+                    updateFormMutation.mutate({
+                      id,
+                      status: "published",
+                    });
+                    setHasUnpublishedEdits(false);
+                  }
+                }}
+                disabled={isForger || isReadOnly || (form?.status === "published" && !hasUnpublishedEdits)}
+                className={`px-4 py-2 rounded text-sm uppercase font-bold tracking-widest transition-all cursor-pointer 
+                  ${form?.status === "published" && !hasUnpublishedEdits
+                    ? "bg-stone-900 text-emerald-500/50 border border-transparent cursor-default"
+                    : form?.status === "published" && hasUnpublishedEdits
+                    ? "bg-emerald-950/30 text-emerald-400 border border-emerald-900/60 shadow-[0_0_10px_rgba(16,185,129,0.1)]"
+                    : "text-stone-500 hover:text-stone-300 border border-transparent"
+                  } ${isForger || isReadOnly ? "opacity-35 cursor-not-allowed" : ""}`}
+              >
+                {form?.status === "published" 
+                  ? (hasUnpublishedEdits ? "Update Form" : "Published") 
+                  : "Publish Form"}
+              </button>
+            </div>
           </div>
         </div>
       </header>
