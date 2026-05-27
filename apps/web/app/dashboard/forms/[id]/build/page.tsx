@@ -585,7 +585,7 @@ export default function BuildPage({ params }: { params: Promise<{ id: string }> 
         {/* LEFT PANEL: Fields List Panel */}
         <section className={`w-full lg:w-80 bg-stone-900/25 border-b lg:border-b-0 lg:border-r border-stone-850 flex flex-col overflow-hidden ${mobileTab === "fields" ? "flex" : "hidden"} lg:flex ${isReadOnly ? "pt-12" : ""}`}>
           
-          <div className="flex-1 overflow-y-auto p-5 flex flex-col space-y-5">
+          <div className="flex-1 overflow-y-auto scrollbar-hide p-5 flex flex-col space-y-5">
             <div className="flex flex-col space-y-1.5 shrink-0">
               <h2 className="text-lg font-semibold tracking-wider text-stone-300 uppercase">
                 Dream Fields
@@ -736,7 +736,7 @@ export default function BuildPage({ params }: { params: Promise<{ id: string }> 
         </section>
 
         {/* CENTER PANEL: Live Interactive Form Preview */}
-        <section className={`flex-1 bg-stone-950 items-center justify-center p-6 md:p-8 overflow-y-auto ${mobileTab === "preview" ? "flex" : "hidden"} lg:flex ${isReadOnly ? "pt-14" : ""}`}>
+        <section className={`flex-1 bg-stone-950 items-center justify-center p-6 md:p-8 overflow-y-auto scrollbar-hide ${mobileTab === "preview" ? "flex" : "hidden"} lg:flex ${isReadOnly ? "pt-14" : ""}`}>
           <div
             className={`w-full h-full transition-all duration-300 flex flex-col justify-center ${viewportWidth === "mobile" ? "max-w-[375px]" : "max-w-2xl"
               }`}
@@ -800,7 +800,7 @@ export default function BuildPage({ params }: { params: Promise<{ id: string }> 
           </div>
 
           {/* Tab Body contents */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-8 pb-20">
+          <div className="flex-1 overflow-y-auto scrollbar-hide p-6 space-y-8 pb-20">
 
             {/* TAB: Settings */}
             {activeRightTab === "settings" && (

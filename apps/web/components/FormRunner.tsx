@@ -584,7 +584,7 @@ export function FormRunner({ form, fields, passcode, isPreview, onSimulateSubmit
         </div>
 
         {/* Middle Area: Question Renderer with Framer Motion AnimatePresence */}
-        <div className="flex-1 py-4 flex flex-col relative overflow-y-auto overflow-x-hidden min-h-[250px]">
+        <div className="flex-1 py-4 flex flex-col relative overflow-y-auto overflow-x-hidden scrollbar-hide min-h-[250px]">
           <AnimatePresence mode="wait" custom={direction}>
             <motion.div
               key={currentLayerIndex}
