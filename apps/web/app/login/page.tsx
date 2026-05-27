@@ -193,7 +193,7 @@ export default function LoginPage() {
 
       {/* Main glassmorphic container */}
       <div
-        className="relative w-full max-w-md p-8 rounded-sm z-10 transition-all duration-300 shadow-[0_24px_64px_rgba(0,0,0,0.6)]"
+        className="relative w-full max-w-md p-6 sm:p-8 rounded-sm z-10 transition-all duration-300 shadow-[0_24px_64px_rgba(0,0,0,0.6)]"
         style={{
           background: "rgba(10,10,15,0.75)",
           backdropFilter: "blur(12px)",
@@ -203,8 +203,8 @@ export default function LoginPage() {
       >
 
         {/* Title */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl tracking-[0.15em] text-[#EEF3F8] font-cormorant select-none font-medium mb-1">
+        <div className="text-center mb-8 mt-2 sm:mt-0">
+          <h1 className="text-3xl sm:text-4xl tracking-[0.15em] text-[#EEF3F8] font-cormorant select-none font-medium mb-1">
             {activeTab === "login" ? "Enter the Dream" : "Initialize Identity"}
           </h1>
           <p className="text-[14px] uppercase text-[#8BA3BF]/60 tracking-[0.25em]">

@@ -529,16 +529,16 @@ export default function Home() {
               ))}
             </nav>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               <Link
                 href="/login"
-                className="text-[13px] tracking-[0.14em] uppercase text-[#8BA3BF] hover:text-[#EEF3F8] transition-colors"
+                className="hidden sm:block text-[12px] sm:text-[13px] tracking-[0.14em] uppercase text-[#8BA3BF] hover:text-[#EEF3F8] transition-colors"
               >
                 Log In
               </Link>
               <Link
                 href="/register"
-                className="px-5 py-2 bg-[#C9933A] text-[#0A0A0F] text-[13px] font-bold tracking-[0.16em] uppercase rounded-sm hover:bg-[#E8B455] transition-all hover:shadow-[0_0_20px_rgba(201,147,58,0.3)]"
+                className="px-4 sm:px-5 py-2 bg-[#C9933A] text-[#0A0A0F] text-[11px] sm:text-[13px] font-bold tracking-[0.16em] uppercase rounded-sm hover:bg-[#E8B455] transition-all hover:shadow-[0_0_20px_rgba(201,147,58,0.3)]"
               >
                 Get Started
               </Link>
@@ -576,7 +576,7 @@ export default function Home() {
               The thematic sub-copy earns its place AFTER the hook. */}
             <h1
               className="font-cormorant font-medium text-[#EEF3F8] tracking-tight mb-6 leading-[1.04]"
-              style={{ fontSize: "clamp(3.2rem,8vw,6rem)" }}
+              style={{ fontSize: "clamp(2.5rem, 8vw, 6rem)" }}
             >
               Forms that feel<br />
               <em className="italic text-[#C9933A]">like cinema.</em>
@@ -599,7 +599,7 @@ export default function Home() {
                 Secondary CTA stays thematic for users who already get it. */}
               <Link
                 href="/register"
-                className="group px-10 py-4 bg-[#C9933A] text-[#0A0A0F] text-[15px] font-bold tracking-[0.1em] uppercase rounded-sm hover:bg-[#E8B455] transition-all hover:shadow-[0_0_40px_rgba(201,147,58,0.3)] hover:-translate-y-px active:translate-y-0 flex items-center gap-2"
+                className="group px-8 sm:px-10 py-4 bg-[#C9933A] text-[#0A0A0F] text-[14px] sm:text-[15px] font-bold tracking-[0.1em] uppercase rounded-sm hover:bg-[#E8B455] transition-all hover:shadow-[0_0_40px_rgba(201,147,58,0.3)] hover:-translate-y-px active:translate-y-0 flex items-center justify-center gap-2"
               >
                 Build a Form Free
                 <span className="group-hover:translate-x-1 transition-transform">
@@ -608,7 +608,7 @@ export default function Home() {
               </Link>
               <Link
                 href="/dashboard"
-                className="px-10 py-4 text-[#8BA3BF] text-[15px] tracking-[0.1em] uppercase rounded-sm hover:text-[#EEF3F8] transition-all"
+                className="px-8 sm:px-10 py-4 text-[#8BA3BF] text-[14px] sm:text-[15px] tracking-[0.1em] uppercase rounded-sm hover:text-[#EEF3F8] transition-all flex items-center justify-center"
                 style={{ border: "0.5px solid rgba(139,163,191,0.2)" }}
               >
                 View Demo →

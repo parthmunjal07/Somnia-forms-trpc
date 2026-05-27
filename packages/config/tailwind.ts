@@ -5,8 +5,8 @@ const config: Omit<Config, "content"> = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['JetBrains Mono', 'IBM Plex Mono', 'sans-serif'],
-        display: ['Cormorant Garamond', 'serif'],
+        sans: ['var(--font-sans)', 'sans-serif'],
+        display: ['var(--font-cormorant)', 'Cormorant Garamond', 'serif'],
       },
       colors: {
         limbo: "var(--color-limbo)",
