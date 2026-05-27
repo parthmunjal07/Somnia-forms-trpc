@@ -165,8 +165,7 @@ export default function LoginPage() {
   };
 
   const handleGoogleLogin = () => {
-    const baseUrl = env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-    window.location.href = `${baseUrl}/api/auth/google`;
+    window.location.href = "/api/auth/google";
   };
 
   const isLoading = loginMutation.isPending || registerMutation.isPending;
