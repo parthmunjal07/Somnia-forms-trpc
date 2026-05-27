@@ -12,6 +12,7 @@ export interface FieldDefinition {
   validationRules: any | null;
   pageIndex?: number;
   conditionalLogic?: any;
+  order?: number;
 }
 
 interface FieldRendererProps {

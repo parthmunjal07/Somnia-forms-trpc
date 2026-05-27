@@ -195,27 +195,27 @@ export function FormRunner({ form, fields, passcode, isPreview, onSimulateSubmit
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const layers = useMemo(() => {
-    const groups: Record<number, FieldDefinition[]> = {};
-    fields.forEach((field) => {
-      if (field.type === "layer_break") return;
-      const pIdx = field.pageIndex ?? 0;
-      if (!groups[pIdx]) {
-        groups[pIdx] = [];
+    const groups: FieldDefinition[][] = [[]];
+    let currentGroupIndex = 0;
+
+    const sortedFields = [...fields].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+
+    sortedFields.forEach((field) => {
+      if (field.type === "layer_break") {
+        currentGroupIndex++;
+        groups[currentGroupIndex] = [];
+        return;
       }
-      groups[pIdx].push(field);
+      groups[currentGroupIndex]!.push(field);
     });
 
-    const sortedPageIndices = Object.keys(groups)
-      .map(Number)
-      .sort((a, b) => a - b);
-
-    if (sortedPageIndices.length === 0) {
+    if (groups.length === 1 && groups[0]!.length === 0) {
       return [{ title: "Reality (Layer 1)", fields: [] }];
     }
 
-    return sortedPageIndices.map((idx) => ({
+    return groups.map((groupFields, idx) => ({
       title: getLayerName(idx),
-      fields: groups[idx] || [],
+      fields: groupFields,
     }));
   }, [fields]);
 

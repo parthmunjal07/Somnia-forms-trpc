@@ -984,23 +984,7 @@ export default function BuildPage({ params }: { params: Promise<{ id: string }> 
                       />
                     </div>
 
-                    <div className="space-y-2">
-                      <label className="text-xs text-stone-500 uppercase tracking-wider font-semibold block">
-                        Dream Layer Level (Page Index)
-                      </label>
-                      <select
-                        disabled={isReadOnly}
-                        value={selectedField.pageIndex ?? 0}
-                        onChange={(e) => handleFieldChange("pageIndex", Number(e.target.value))}
-                        className="w-full bg-stone-950 border border-stone-800 rounded px-3 py-2 text-sm text-stone-300 focus:outline-none focus:border-emerald-500 transition-colors font-mono"
-                      >
-                        <option value={0}>Reality (Layer 1)</option>
-                        <option value={1}>The Hotel (Layer 2)</option>
-                        <option value={2}>Snow Fortress (Layer 3)</option>
-                        <option value={3}>Limbo (Layer 4)</option>
-                        <option value={4}>Limbo Deep (Layer 5)</option>
-                      </select>
-                    </div>
+
 
                     <div className="flex items-center justify-between py-2 border-y border-stone-800/50 mt-4">
                       <span className="text-xs text-stone-400 uppercase tracking-wider font-semibold">
