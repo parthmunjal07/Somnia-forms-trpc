@@ -171,7 +171,7 @@ export default function LoginPage() {
   const isLoading = loginMutation.isPending || registerMutation.isPending;
 
   return (
-    <main className="relative min-h-screen flex items-center justify-center bg-[#0A0A0F] text-[#C8D8E8] font-mono select-none overflow-hidden px-4 selection:bg-[#C9933A]/20 selection:text-[#E8B455]">
+    <main className="relative min-h-[100svh] flex flex-col items-center justify-center py-24 sm:py-12 bg-[#0A0A0F] text-[#C8D8E8] font-mono select-none overflow-y-auto overflow-x-hidden px-4 selection:bg-[#C9933A]/20 selection:text-[#E8B455]">
 
       <FogAnimation />
 
@@ -186,9 +186,9 @@ export default function LoginPage() {
         }}
       />
 
-      <Link href="/" className="absolute top-8 left-8 z-50 flex items-center gap-3 hover:opacity-80 transition-opacity">
-        <Totem size={18} className="text-[#C9933A]" />
-        <span className="font-cormorant text-2xl text-[#C9933A] tracking-[0.15em]">SOMNIA</span>
+      <Link href="/" className="absolute top-6 left-4 sm:top-8 sm:left-8 z-50 flex items-center gap-2 sm:gap-3 hover:opacity-80 transition-opacity">
+        <Totem size={18} className="text-[#C9933A] w-[16px] h-[16px] sm:w-[18px] sm:h-[18px]" />
+        <span className="font-cormorant text-xl sm:text-2xl text-[#C9933A] tracking-[0.15em]">SOMNIA</span>
       </Link>
 
       {/* Main glassmorphic container */}

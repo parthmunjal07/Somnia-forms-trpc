@@ -468,7 +468,7 @@ export default function AnalyticsPage({ params }: { params: Promise<{ id: string
 
             {/* Charts Section */}
             <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Chronological 30-Day Line Chart */}
+              {/* Chronological 7-Day Line Chart */}
               <div className="lg:col-span-2 bg-[rgba(255,255,255,0.02)] border border-[rgba(200,216,232,0.1)] p-6 rounded-lg flex flex-col justify-between space-y-4">
                 <div className="flex items-center justify-between">
                   <div>

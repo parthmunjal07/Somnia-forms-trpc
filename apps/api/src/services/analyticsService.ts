@@ -140,7 +140,7 @@ export class AnalyticsService {
 
     const now = new Date();
     const defaultStart = new Date();
-    defaultStart.setDate(now.getDate() - 29); // Default to last 30 days
+    defaultStart.setDate(now.getDate() - 6); // Default to last 7 days
 
     const start = filters?.startDate ? new Date(filters.startDate) : defaultStart;
     const end = filters?.endDate ? new Date(filters.endDate) : now;
