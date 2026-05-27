@@ -7,6 +7,14 @@ import bcrypt from 'bcrypt'
 async function seed() {
   console.log("starting seed...");
 
+  // Check if already seeded
+  const { eq } = require("drizzle-orm");
+  const existingUsers = await db.select().from(usersTable).where(eq(usersTable.email, "demo@somnia.io")).limit(1);
+  if (existingUsers.length > 0) {
+    console.log("Database is already seeded! Exiting.");
+    process.exit(0);
+  }
+
   // Seed Users
   console.log("Seeding users...");
   const [demoUser] = await db.insert(usersTable).values({

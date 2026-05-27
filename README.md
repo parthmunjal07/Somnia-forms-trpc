@@ -6,6 +6,12 @@ Somnia is a full-stack, Inception-themed form builder and analytics engine. Ever
 
 Built as a **Turborepo monorepo** with a fully decoupled **Express + tRPC** backend and a **Next.js 15 App Router** frontend.
 
+### 🌐 Live Preview
+- **Frontend**: [https://somniaforms.parthmunjal.in](https://somniaforms.parthmunjal.in)
+- **Backend API**: [https://somnia-forms-trpc-production.up.railway.app/](https://somnia-forms-trpc-production.up.railway.app/)
+- **API Docs (Scalar)**: [https://somnia-forms-trpc-production.up.railway.app/docs](https://somnia-forms-trpc-production.up.railway.app/docs)
+- **Github Link**: [https://github.com/parthmunjal07](https://github.com/parthmunjal07/somnia-forms-trpc)
+
 ---
 
 ## Table of Contents
@@ -609,9 +615,9 @@ SKIP_ENV_VALIDATION=true
 | `CSRF_SECRET` | ✅ | API | Signs CSRF tokens |
 | `RESEND_API_KEY` | ✅ | API | Resend.com API key for emails |
 | `RESEND_FROM_EMAIL` | ❌ | API | Optional custom sender email (defaults to `Somnia <system@somnia.app>`. Use `onboarding@resend.dev` for unverified Resend domains) |
-| `FRONTEND_URL` | ❌ | API | Default `http://localhost:3000`. Used for OAuth redirects and email links |
-| `ALLOWED_ORIGINS` | ❌ | API | Comma-separated CORS origins. Default `http://localhost:3000` |
-| `BASE_URL` | ❌ | API | Default `http://localhost:8000`. Used for OpenAPI base URL |
+| `FRONTEND_URL` | ❌ | API | Default `https://somniaforms.parthmunjal.in`. Used for OAuth redirects and email links |
+| `ALLOWED_ORIGINS` | ❌ | API | Comma-separated CORS origins. Default `https://somniaforms.parthmunjal.in` |
+| `BASE_URL` | ❌ | API | Default `https://somnia-forms-trpc-production.up.railway.app`. Used for OpenAPI base URL |
 | `PORT` | ❌ | API | Default `8000` |
 | `NODE_ENV` | ❌ | API | `development` / `production` / `test` |
 | `UPSTASH_REDIS_REST_URL` | ❌ | API | Upstash Redis URL for distributed rate limiting |
@@ -648,11 +654,11 @@ pnpm dev
 
 | Service | URL |
 | :--- | :--- |
-| Next.js Frontend | `http://localhost:3000` |
-| Express API | `http://localhost:8000` |
-| API Health Check | `http://localhost:8000/health` |
-| OpenAPI JSON | `http://localhost:8000/openapi.json` |
-| Scalar API Docs | `http://localhost:8000/docs` |
+| Next.js Frontend | `https://somniaforms.parthmunjal.in` |
+| Express API | `https://somnia-forms-trpc-production.up.railway.app` |
+| API Health Check | `https://somnia-forms-trpc-production.up.railway.app/health` |
+| OpenAPI JSON | `https://somnia-forms-trpc-production.up.railway.app/openapi.json` |
+| Scalar API Docs | `https://somnia-forms-trpc-production.up.railway.app/docs` |
 
 ---
 
