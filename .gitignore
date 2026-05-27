@@ -27,6 +27,10 @@ out/
 build
 dist
 
+# Exception for Next.js build page route
+!apps/web/app/**/build/
+!apps/web/app/**/build/**/*
+
 
 # Debug
 npm-debug.log*
