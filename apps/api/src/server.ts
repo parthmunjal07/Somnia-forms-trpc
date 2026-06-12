@@ -90,7 +90,7 @@ app.use(cookieParser());
 app.use(passport.initialize());
 
 // ─── Body Size Limits ─────────────────────────────────────────────────────────
-app.use(express.json({ limit: "50kb" }));
+app.use(express.json({ limit: "500kb" }));
 app.use(express.urlencoded({ extended: true, limit: "50kb" }));
 
 // ─── Rate Limiters ────────────────────────────────────────────────────────────
