@@ -466,7 +466,7 @@ export default function BuildPage({ params }: { params: Promise<{ id: string }> 
 
       {/* Onboarding Spotlight Overlay */}
       {showOnboarding && (
-        <div className="absolute inset-0 z-[100] pointer-events-none flex" style={{ backdropFilter: "blur(2px)" }}>
+        <div className="absolute inset-0 z-[100] pointer-events-none flex">
           <div className="w-full lg:w-80 h-full shadow-[0_0_0_9999px_rgba(10,10,15,0.7)] bg-transparent relative">
             <div className="hidden lg:flex absolute right-[-280px] top-40 items-center gap-4 text-[#C9933A] drop-shadow-[0_0_8px_rgba(201,147,58,0.5)]">
               <ArrowLeft size={24} className="animate-bounce" />
